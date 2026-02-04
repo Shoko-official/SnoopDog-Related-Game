@@ -618,7 +618,8 @@ class Wolf(PhysObj):
         self.status = 'run'
         self.image = self.animations['run'][0]
         self.mask = get_mask(self.image)
-        self.rect = self.image.get_rect(midbottom=(x, y))
+        self.rect = pygame.Rect(0, 0, 80, 100)
+        self.rect.midbottom = (x, y)
         self.direction.x = dir_x
         self.speed = random.randint(200, 300)
         self.visual_offset_y = 0
@@ -646,7 +647,8 @@ class Bear(PhysObj):
         self.status = 'run'
         self.image = self.animations['run'][0]
         self.mask = get_mask(self.image)
-        self.rect = self.image.get_rect(midbottom=(x, y))
+        self.rect = pygame.Rect(0, 0, 100, 150)
+        self.rect.midbottom = (x, y)
         self.direction.x = dir_x
         self.speed = random.randint(100, 180)
         self.visual_offset_y = 0

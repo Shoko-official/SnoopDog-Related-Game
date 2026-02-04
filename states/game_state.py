@@ -339,7 +339,12 @@ class GameState(State):
             elif sprite.rect.top > SCREEN_HEIGHT + 400: 
                 sprite.kill()
 
-        if self.camera_x > 5000 and random.random() < 0.005: 
+        # Plus d'oiseaux dans la forêt
+        chance = 0.005
+        if self.get_biome_at(self.camera_x + SCREEN_WIDTH) == "foret":
+            chance = 0.04
+            
+        if self.camera_x > 5000 and random.random() < chance: 
             self.spawn_aerial_enemy()
         
         self.player.update(actual_dt, self.platforms, self.trash_obstacles, self.weed_items, self.powerups, self.mobs)
