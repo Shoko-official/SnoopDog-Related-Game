@@ -109,6 +109,8 @@ class HUD:
         # Polices
         self.font_main = pygame.font.SysFont('Impact', 32)
         self.font_sub = pygame.font.SysFont('Arial', 20, bold=True)
+        self.font_btn = pygame.font.SysFont('Arial', 32, bold=True)
+        self.font_small = pygame.font.SysFont('Arial', 14)
         
     def draw_hearts(self, surface, x, y, current, maximum, size=HEART_SIZE):
         from asset_loader import asset_loader
@@ -172,15 +174,86 @@ class HUD:
             txt = self.font_main.render(f"x {count}", True, (100, 255, 100))
             surface.blit(txt, (x + 50, y + 2))
     
-    def draw_pause_menu(self, surface):
-        # Juste un petit overlay sombre
-        s = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
-        s.fill((0, 0, 0, 180))
-        surface.blit(s, (0, 0))
+    def draw_pause_menu(self, surface, show_missions=False):
+        # Overlay sombre avec flou simulé
+        overlay = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 200))
+        surface.blit(overlay, (0, 0))
         
-        msg = self.font_main.render("- PAUSE -", True, (255, 255, 255))
-        r = msg.get_rect(center=(surface.get_width()//2, surface.get_height()//2))
-        surface.blit(msg, r)
+        cx, cy = surface.get_width() // 2, surface.get_height() // 2
+        
+        if not show_missions:
+            # Titre
+            title = self.font_main.render("- PAUSE -", True, (255, 255, 255))
+            surface.blit(title, title.get_rect(center=(cx, cy - 180)))
+            
+            # Boutons (On définit leurs rects pour la détection de clic dans GameState)
+            self._draw_pause_btn(surface, (cx, cy - 60), "REPRENDRE", (100, 255, 100))
+            self._draw_pause_btn(surface, (cx, cy + 10), "MISSIONS", (100, 200, 255))
+            self._draw_pause_btn(surface, (cx, cy + 80), "RECOMMENCER", (255, 200, 50))
+            self._draw_pause_btn(surface, (cx, cy + 150), "QUITTER LE JEU", (255, 80, 80))
+            
+            hint = self.font_small.render("[P] ou [ESC] pour fermer", True, (150, 150, 150))
+            surface.blit(hint, hint.get_rect(center=(cx, surface.get_height() - 30)))
+        else:
+            # Menu missions pendant la pause
+            from progression import progression
+            from settings import PANEL_W, PANEL_H
+            
+            panel_w, panel_h = 600, 500
+            px, py = cx - panel_w // 2, cy - panel_h // 2
+            
+            panel_rect = pygame.Rect(px, py, panel_w, panel_h)
+            pygame.draw.rect(surface, (20, 20, 30), panel_rect, border_radius=20)
+            pygame.draw.rect(surface, (0, 180, 255), panel_rect, width=2, border_radius=20)
+            
+            title = self.font_sub.render("OBJECTIFS EN COURS", True, (0, 180, 255))
+            surface.blit(title, title.get_rect(centerx=cx, top=py + 20))
+            
+            for i, q in enumerate(progression.data["quests"]):
+                qy = py + 80 + i * 120
+                q_rect = pygame.Rect(px + 30, qy, panel_w - 60, 100)
+                
+                bar_w = 400
+                bar_h = 6
+                bar_rect = pygame.Rect(q_rect.left + 20, qy + 60, bar_w, bar_h)
+                pygame.draw.rect(surface, (50, 50, 60), bar_rect, border_radius=3)
+                
+                progress = q["current"] / q["goal"]
+                prog_color = (0, 255, 150) if q["completed"] else (255, 255, 255)
+                pygame.draw.rect(surface, prog_color, (bar_rect.x, bar_rect.y, int(bar_w * progress), bar_h), border_radius=3)
+                
+                name = self.font_sub.render(q["title"], True, prog_color)
+                surface.blit(name, (q_rect.left + 20, qy + 10))
+                desc = self.font_small.render(q["desc"], True, (200, 200, 200))
+                surface.blit(desc, (q_rect.left + 20, qy + 35))
+                
+                stat_txt = f"{q['current']} / {q['goal']}"
+                stat_surf = self.font_small.render(stat_txt, True, (150, 150, 150))
+                surface.blit(stat_surf, (bar_rect.right + 15, bar_rect.y - 6))
+
+            hint = self.font_small.render("Appuie sur [ESC] pour revenir au menu pause", True, (150, 150, 150))
+            surface.blit(hint, hint.get_rect(centerx=cx, bottom=py + panel_h - 20))
+
+    def _draw_pause_btn(self, surface, center, text, color):
+        rect = pygame.Rect(0, 0, 300, 50)
+        rect.center = center
+        souris = pygame.mouse.get_pos()
+        hover = rect.collidepoint(souris)
+        
+        alpha = (0, 0, 0, 100)
+        if hover: alpha = (color[0], color[1], color[2], 50)
+        
+        bg = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
+        bg.fill(alpha)
+        surface.blit(bg, rect)
+        
+        border_color = color if hover else (150, 150, 150)
+        pygame.draw.rect(surface, border_color, rect, width=2, border_radius=5)
+        
+        txt_color = (255, 255, 255) if hover else (200, 200, 200)
+        txt = self.font_sub.render(text, True, txt_color)
+        surface.blit(txt, txt.get_rect(center=rect.center))
     
     def draw_game_over(self, surface, score, status):
         # Écran de fin un peu plus "brut"

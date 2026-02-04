@@ -46,11 +46,13 @@ class GameState(State):
         self.init_sprites()
         
         self.paused = False
+        self.show_missions = False
         self.game_over = False
         self.arrest_status = None
         
         self.render_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)) 
         self.camera_x = 0
+        self.mission_alpha = 0
  
         
         self.death_triggered = False
@@ -302,7 +304,12 @@ class GameState(State):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if (event.key == pygame.K_p or event.key == pygame.K_ESCAPE) and not self.death_triggered:
-                    self.paused = not self.paused
+                    if self.show_missions:
+                        self.show_missions = False
+                    else:
+                        self.paused = not self.paused
+                        if not self.paused: self.show_missions = False
+                    play_sfx("click")
                 
                 if event.key == pygame.K_r and (self.game_over or self.death_triggered):
                     self.brain.change(self.__class__(self.brain))
@@ -313,6 +320,31 @@ class GameState(State):
                     
                 if event.key == pygame.K_h:
                     self.show_hitboxes = not self.show_hitboxes
+
+            if self.paused and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                cx, cy = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
+                souris = pygame.mouse.get_pos()
+                
+                if not self.show_missions:
+                    # REPRENDRE
+                    if pygame.Rect(cx - 150, cy - 85, 300, 50).collidepoint(souris):
+                        self.paused = False
+                        play_sfx("click")
+                    # MISSIONS
+                    elif pygame.Rect(cx - 150, cy - 15, 300, 50).collidepoint(souris):
+                        self.show_missions = True
+                        play_sfx("click")
+                    # RECOMMENCER
+                    elif pygame.Rect(cx - 150, cy + 55, 300, 50).collidepoint(souris):
+                        self.brain.change(GameState(self.brain))
+                        play_sfx("click")
+                        return
+                    # QUITTER
+                    elif pygame.Rect(cx - 150, cy + 125, 300, 50).collidepoint(souris):
+                        play_sfx("click")
+                        from states.menu_state import MenuState
+                        self.brain.change(MenuState(self.brain))
+                        return
         if self.paused: 
             return
 
@@ -590,7 +622,7 @@ class GameState(State):
                 surface.blit(combo_text, (SCREEN_WIDTH // 2 - combo_text.get_width() // 2, 80))
         
         if self.paused: 
-            self.hud.draw_pause_menu(surface)
+            self.hud.draw_pause_menu(surface, self.show_missions)
 
     def apply_shake(self, surface):
         if self.game_over: return surface

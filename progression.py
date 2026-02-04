@@ -19,7 +19,7 @@ QUEST_TEMPLATES = [
 class ProgressionManager:
     def __init__(self):
         self.data = {
-            "money": 0,
+            "credits": 0,
             "quests": [],
             "stats": {
                 "total_dist": 0,
@@ -35,7 +35,16 @@ class ProgressionManager:
         if os.path.exists(FILE_PATH):
             try:
                 with open(FILE_PATH, 'r') as f:
-                    self.data = json.load(f)
+                    loaded_data = json.load(f)
+                    # Migration : si l'ancien champ 'money' existe
+                    if "money" in loaded_data and "credits" not in loaded_data:
+                        loaded_data["credits"] = loaded_data.pop("money")
+                    
+                    # Sécurité : assurer que 'credits' existe
+                    if "credits" not in loaded_data:
+                        loaded_data["credits"] = 0
+                        
+                    self.data.update(loaded_data)
             except:
                 pass
 
@@ -96,7 +105,7 @@ class ProgressionManager:
     def claim_reward(self, quest_index):
         q = self.data["quests"][quest_index]
         if q["completed"] and not q["claimed"]:
-            self.data["money"] += q["reward"]
+            self.data["credits"] += q["reward"]
             q["claimed"] = True
             
             # Si toutes les quêtes sont réclamées, on en génère de nouvelles ? 

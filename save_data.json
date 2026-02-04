@@ -1,0 +1,44 @@
+{
+    "money": 0,
+    "quests": [
+        {
+            "id": "distance",
+            "title": "Marathonien",
+            "desc": "Parcours 1173m dans le ghetto",
+            "goal": 1173,
+            "current": 28,
+            "reward": 150,
+            "goal_type": "dist",
+            "completed": false,
+            "claimed": false
+        },
+        {
+            "id": "kill_birds",
+            "title": "Chasseur urbain",
+            "desc": "\u00c9limine 9 pigeons/oiseaux",
+            "goal": 9,
+            "current": 0,
+            "reward": 130,
+            "goal_type": "birds",
+            "completed": false,
+            "claimed": false
+        },
+        {
+            "id": "kill_drones",
+            "title": "Cyber-Guerrier",
+            "desc": "D\u00e9truis 3 drones de surveillance",
+            "goal": 3,
+            "current": 0,
+            "reward": 250,
+            "goal_type": "drones",
+            "completed": false,
+            "claimed": false
+        }
+    ],
+    "stats": {
+        "total_dist": 0,
+        "total_weed": 0,
+        "total_kills": 0
+    },
+    "credits": 0
+}
