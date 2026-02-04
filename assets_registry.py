@@ -39,7 +39,7 @@ ASSETS = {
         "ground_street": f"{ENV_DIR}/props/ground.png",
         "ground_park": f"{ENV_DIR}/props/ground_park.png", 
         "ground_rooftop": f"{ENV_DIR}/props/toit.png",
-        "ground_forest": f"{ENV_DIR}/props/ground_park.png",
+        "ground_foret": f"{ENV_DIR}/props/ground_park.png",
     },
 
     "items": {

@@ -326,11 +326,12 @@ class Obstacle(pygame.sprite.Sprite):
         hitbox_offset = 0
         self.visual_offset_y = 0
         
-        if biome == "park" or biome == "foret":
+        if biome in ["park", "foret", "rooftop"]:
             if h < 100:
-                 hitbox_offset = 80 
+                 hitbox_offset = 80 if biome != "rooftop" else 40
             else:
-                 self.visual_offset_y = -75        
+                 # Si c'est trop haut, on met un offset plus léger pour le toit
+                 self.visual_offset_y = -75 if biome != "rooftop" else -15        
         asset_key = f"ground_{biome}"
         if asset_key not in ASSETS["environment"]:
             asset_key = "ground"
