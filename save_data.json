@@ -50,12 +50,12 @@
     "Countess_Vampire",
     "Shinobi"
   ],
-  "active_skin_set": "default",
-  "active_variant": null,
+  "active_skin_set": "vampires",
+  "active_variant": "Countess_Vampire",
   "stats": {
-    "total_dist": 385,
-    "total_weed": 73,
+    "total_dist": 490,
+    "total_weed": 91,
     "total_kills": 0
   },
-  "weed_stash": 0
+  "weed_stash": 18
 }

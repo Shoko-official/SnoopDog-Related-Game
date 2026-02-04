@@ -205,7 +205,10 @@ class MenuState(State):
                     
                     # Sélection de la variante (Grille horizontale)
                     active_set = progression.state.get("active_skin_set", "default")
-                    if active_set != "default":
+                    
+                    # On affiche les variantes seulemnt si c'est un set complet
+                    # Si c'est un item unitaire, pas de variantes à choisir
+                    if active_set != "default" and active_set in ASSETS["boutique_sets"]:
                         cfg = ASSETS["boutique_sets"][active_set]
                         for j, var_id in enumerate(cfg["variants"]):
                             var_rect = pygame.Rect(panel.left + 30 + j * 125, panel.top + 380, 110, 110)
@@ -637,10 +640,10 @@ class MenuState(State):
                 pygame.draw.circle(surface, (100, 255, 100), (rect.right - 10, rect.top + 10), 7)
 
         # --- GRILLE DES VARIANTES (Si pack sélectionné) ---
-        if active_set != "default":
+        if active_set != "default" and active_set in ASSETS["boutique_sets"]:
             surface.blit(self.font_rules_title.render("VARIANTES", True, (0, 180, 255)), (panel.left + 30, panel.top + 340))
             cfg = ASSETS["boutique_sets"][active_set]
-            active_var = progression.state.get("active_variant", cfg["variants"][0])
+            active_var = progression.state.get("active_variant")
             
             for j, var_id in enumerate(cfg["variants"]):
                 rect = pygame.Rect(panel.left + 30 + j * 125, panel.top + 380, 110, 110)
@@ -706,7 +709,15 @@ class MenuState(State):
             surface.blit(q_title, (rect.left + 25, rect.top + 18))
             
             # Description
-            q_desc = self.font_rules_body.render(q["desc"], True, (180, 180, 190) if not q["claimed"] else (80, 80, 80))
+            desc_txt = q["desc"]
+            if q["id"] == "weed":
+                # Hack pour mettre à jour le nom de l'objet dynamique
+                _, item_name = progression.get_active_collectible()
+                parts = desc_txt.split(" ")
+                if len(parts) >= 2 and parts[0] == "Collecte":
+                     desc_txt = f"{parts[0]} {parts[1]} {item_name}"
+            
+            q_desc = self.font_rules_body.render(desc_txt, True, (180, 180, 190) if not q["claimed"] else (80, 80, 80))
             surface.blit(q_desc, (rect.left + 25, rect.top + 48))
             
             # Barre de progression plus stylée

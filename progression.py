@@ -73,17 +73,50 @@ class PlayerProfile:
         except OSError:
             if temp.exists(): temp.unlink()
 
+    def get_active_collectible(self):
+        # Récupère le type de collectible (et son nom) selon le skin actif
+        from assets_registry import ASSETS
+        active = self.state.get("active_skin_set", "default")
+        c_map = ASSETS.get("collectible_map", {})
+        
+        key = c_map.get(active)
+        if not key:
+            key = "weed" 
+            for s_name, s_cfg in ASSETS.get("boutique_sets", {}).items():
+                if active == s_name or active in s_cfg.get("variants", []):
+                    key = c_map.get(s_name, "weed")
+                    break
+                    
+        # Mapping nom affiché
+        names = {
+            "weed": "pochons",
+            "blood": "fioles de sang",
+            "biceps": "protéines",
+            "ramen": "bols de ramen",
+            "red_cap": "casquettes",
+            "ammo_box": "munitions"
+        }
+        return key, names.get(key, "items")
+
     def _init_quests(self):
         # On prend 3 missions au pif
         self.state["quests"] = []
         selection = random.sample(QUEST_DEFS, 3)
         
+        _, item_name = self.get_active_collectible()
+        
         for tpl in selection:
             target = random.randint(tpl["min"], tpl["max"])
+            
+            txt = tpl["txt"]
+            # Si c'est la quête de collecte, on adapte le texte
+            if tpl["id"] == "weed":
+                 txt = f"Collecte {{n}} {item_name}"
+            
             self.state["quests"].append({
                 "id": tpl["id"], 
                 "title": tpl["label"],
-                "desc": tpl["txt"].format(n=target),
+                "desc": txt.format(n=target),
                 "goal": target,
                 "current": 0,
                 "reward": tpl["rwd"],

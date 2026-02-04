@@ -578,7 +578,9 @@ class GameState(State):
             hearts_offset = self.player.max_hp * (HEART_SIZE + 5) + 20
             self.hud.draw_withdrawal_bar(surface, HUD_X + hearts_offset, HUD_Y + 10, self.player.withdrawal, self.player.max_withdrawal)
             
-            weed_img = asset_loader.fetch_img(ASSETS["items"]["weed"])
+            from progression import progression
+            key, _ = progression.get_active_collectible()
+            weed_img = asset_loader.fetch_img(ASSETS["items"][key])
             self.hud.draw_item_count(surface, SCREEN_WIDTH - 150, HUD_Y, weed_img, self.player.weed_count)
             
             font = pygame.font.Font(None, 40)
