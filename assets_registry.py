@@ -42,6 +42,15 @@ ASSETS = {
         "ground_foret": f"{ENV_DIR}/props/ground_park.png",
     },
 
+    "menu_backgrounds": {
+        "default": "graphics/Weed_Menu_BG.png",
+        "knights": "graphics/Chevalier_Menu_BG.png",
+        "werewolves": "graphics/Loup_Menu_BG.png",
+        "samurai": "graphics/Samurai_Menu_BGpng.png",
+        "vampires": "graphics/Vampire_Menu_BG.png",
+        "fighters": "graphics/Cerisier_Japon_Menu_BG.png",
+    },
+
 
     "items": {
         "weed": "graphics/items/weed.png", 

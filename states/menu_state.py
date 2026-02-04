@@ -12,15 +12,13 @@ class MenuState(State):
         self.SW = SCREEN_WIDTH
         self.SH = SCREEN_HEIGHT
 
-        self.bg = asset_loader.fetch_img("graphics/Menu_Background.png", alpha=False)
-
-        if self.bg:
-            self.bg = pygame.transform.scale(self.bg, (self.SW, self.SH))
-
         self.overlay = pygame.Surface((self.SW, self.SH), pygame.SRCALPHA)
         for y in range(self.SH):
             alpha = int(60 + 100 * (y / self.SH))
             self.overlay.fill((0, 0, 0, alpha), (0, y, self.SW, 1))
+
+        self.current_bg_key = None
+        self.update_background()
 
         self.font_title = pygame.font.SysFont("arial", 72, bold=True)
         self.font_btn   = pygame.font.SysFont("arial", 28, bold=True)
@@ -77,6 +75,29 @@ class MenuState(State):
             ("rule",  " Ralphie risque de vous attraper"),
         ]
 
+    def update_background(self):
+         from assets_registry import ASSETS
+         active = progression.state.get("active_skin_set", "default")
+         
+         target_set = active
+         if active not in ASSETS.get("menu_backgrounds", {}):
+             for s_name, s_cfg in ASSETS.get("boutique_sets", {}).items():
+                if active == s_name or active in s_cfg.get("variants", []):
+                    target_set = s_name
+                    break
+         
+         if target_set != self.current_bg_key:
+              self.current_bg_key = target_set
+              bg_map = ASSETS.get("menu_backgrounds", {})
+              path = bg_map.get(target_set, bg_map.get("default", "graphics/Weed_Menu_BG.png"))
+              
+              try:
+                  self.bg = asset_loader.fetch_img(path, alpha=False)
+                  if self.bg:
+                       self.bg = pygame.transform.scale(self.bg, (self.SW, self.SH))
+              except:
+                  pass
+
     def _panel_rect(self):
         return pygame.Rect(
             self.SW // 2 - PANEL_W // 2,
@@ -85,6 +106,7 @@ class MenuState(State):
         )
 
     def update(self, dt, events):
+        self.update_background()
         self.t += dt
         souris = pygame.mouse.get_pos()
 
@@ -118,13 +140,13 @@ class MenuState(State):
                 if self.show_rules:
                     panel = self._panel_rect()
                     # Hitbox pour fermer les regles
-                    bouton_fermer = pygame.Rect(panel.right - 36, panel.top + 4, 32, 28)
+                    bouton_fermer = pygame.Rect(panel.right - 60, panel.top + 10, 50, 50)
                     if bouton_fermer.collidepoint(souris) or not panel.collidepoint(souris):
                         self.show_rules = False
                         play_sfx("click")
                 elif self.show_shop:
                     panel = self._panel_rect()
-                    bouton_fermer = pygame.Rect(panel.right - 36, panel.top + 4, 32, 28)
+                    bouton_fermer = pygame.Rect(panel.right - 60, panel.top + 10, 50, 50)
                     if bouton_fermer.collidepoint(souris) or not panel.collidepoint(souris):
                         self.show_shop = False
                         play_sfx("click")
@@ -175,7 +197,7 @@ class MenuState(State):
                                             play_sfx("click")
                 elif self.show_locker:
                     panel = self._panel_rect()
-                    bouton_fermer = pygame.Rect(panel.right - 36, panel.top + 4, 32, 28)
+                    bouton_fermer = pygame.Rect(panel.right - 60, panel.top + 10, 50, 50)
                     if bouton_fermer.collidepoint(souris) or not panel.collidepoint(souris):
                         self.show_locker = False
                         play_sfx("click")
@@ -218,7 +240,7 @@ class MenuState(State):
                                 play_sfx("click")
                 elif self.show_missions:
                     panel = self._panel_rect()
-                    bouton_fermer = pygame.Rect(panel.right - 36, panel.top + 4, 32, 28)
+                    bouton_fermer = pygame.Rect(panel.right - 60, panel.top + 10, 50, 50)
                     if bouton_fermer.collidepoint(souris) or not panel.collidepoint(souris):
                         self.show_missions = False
                         play_sfx("click")
@@ -399,10 +421,10 @@ class MenuState(State):
         pygame.draw.rect(surface, C_GOLD, panel, width=3, border_radius=14)
 
         # Bouton fermer
-        bouton_fermer = pygame.Rect(panel.right - 36, panel.top + 6, 28, 24)
+        bouton_fermer = pygame.Rect(panel.right - 50, panel.top + 10, 40, 40)
         souris = pygame.mouse.get_pos()
         couleur = (255, 100, 100) if bouton_fermer.collidepoint(souris) else C_WHITE_DIM
-        croix = self.font_rules_title.render("✕", True, couleur)
+        croix = self.font_title.render("×", True, couleur)
         surface.blit(croix, croix.get_rect(center=bouton_fermer.center))
 
         # Texte (avec alpha si possible, sinon simple blit)
@@ -432,10 +454,10 @@ class MenuState(State):
         pygame.draw.rect(surface, (0, 180, 255, 50), header_rect, border_top_left_radius=20, border_top_right_radius=20)
 
         # Bouton fermer (X)
-        btn_close = pygame.Rect(panel.right - 45, panel.top + 15, 30, 30)
+        btn_close = pygame.Rect(panel.right - 60, panel.top + 10, 50, 50)
         souris = pygame.mouse.get_pos()
         close_col = (255, 50, 50) if btn_close.collidepoint(souris) else (200, 200, 200)
-        surface.blit(self.font_title.render("×", True, close_col), (panel.right - 55, panel.top - 10))
+        surface.blit(self.font_title.render("×", True, close_col), btn_close.topleft)
 
         title = self.font_title.render("BOUTIQUE", True, (255, 255, 255))
         title = pygame.transform.scale(title, (int(title.get_width() * 0.6), int(title.get_height() * 0.6)))
@@ -589,6 +611,12 @@ class MenuState(State):
         title = pygame.transform.scale(title, (int(title.get_width()*0.6), int(title.get_height()*0.6)))
         surface.blit(title, (panel.left + 30, panel.top + 15))
 
+        # CLOSE BTN
+        btn_close = pygame.Rect(panel.right - 60, panel.top + 10, 50, 50)
+        souris = pygame.mouse.get_pos()
+        close_col = (255, 50, 50) if btn_close.collidepoint(souris) else (200, 200, 200)
+        surface.blit(self.font_title.render("×", True, close_col), btn_close.topleft)
+
         from assets_registry import ASSETS
         unlocked = progression.state["unlocked_sets"]
         active_set = progression.state.get("active_skin_set", "default")
@@ -672,10 +700,10 @@ class MenuState(State):
         pygame.draw.rect(surface, C_GOLD, panel, width=3, border_radius=14)
 
         # Bouton fermer
-        bouton_fermer = pygame.Rect(panel.right - 36, panel.top + 6, 28, 24)
+        bouton_fermer = pygame.Rect(panel.right - 50, panel.top + 10, 40, 40)
         souris = pygame.mouse.get_pos()
         couleur = (255, 100, 100) if bouton_fermer.collidepoint(souris) else C_WHITE_DIM
-        croix = self.font_rules_title.render("✕", True, couleur)
+        croix = self.font_title.render("×", True, couleur)
         surface.blit(croix, croix.get_rect(center=bouton_fermer.center))
 
         title = self.font_title.render("MISSIONS DE RUE", True, C_RULE_TITLE)
