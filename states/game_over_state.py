@@ -3,12 +3,16 @@ import math
 from state_machine import State
 from settings import *
 from asset_loader import asset_loader
+from progression import progression
 
 class GameOverState(State):
-    def __init__(self, brain, score, status):
+    def __init__(self, brain, score, status, run_stats=None):
         super().__init__(brain)
         self.score = score
         self.status = status
+        
+        if run_stats:
+            progression.update_progress(run_stats)
         self.SW = SCREEN_WIDTH
         self.SH = SCREEN_HEIGHT
 

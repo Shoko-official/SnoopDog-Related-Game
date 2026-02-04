@@ -62,6 +62,10 @@ class Player(PhysObj):
         
         self.god_mode = False 
         self.global_speed_mult = 1.0 
+        
+        # Stats pour les quêtes
+        self.shield_activations = 0
+        self.magnet_activations = 0
 
     def load_all(self):
         self.animations = asset_loader.load_player(PLAYER_SCALE)
@@ -198,9 +202,11 @@ class Player(PhysObj):
         if p_type == "magnet":
             self.magnet_active = True
             self.magnet_timer = 1200 
+            self.magnet_activations += 1
         elif p_type == "shield":
             self.has_shield = True
             self.shield_timer = 1200 
+            self.shield_activations += 1
     
     def update_powerups(self, dt, weed_group):
         if self.magnet_active:

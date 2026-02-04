@@ -63,6 +63,18 @@ class GameState(State):
         self.current_biome = "street"
         
         self.show_hitboxes = False
+        
+        # Stats pour les quêtes
+        self.run_stats = {
+            "dist": 0,
+            "weed": 0,
+            "rats": 0,
+            "birds": 0,
+            "drones": 0,
+            "shield": 0,
+            "magnet": 0,
+            "combo": 0
+        }
 
 
 
@@ -326,7 +338,14 @@ class GameState(State):
         self.spawn_world_chunk()
 
         if self.death_triggered:
-            self.brain.change(GameOverState(self.brain, self.score, self.arrest_status))
+            # On met à jour les stats finales avant de passer à l'écran de fin
+            self.run_stats["dist"] = self.score
+            self.run_stats["weed"] = self.player.weed_count
+            self.run_stats["combo"] = self.player.combo_counter
+            self.run_stats["shield"] = self.player.shield_activations
+            self.run_stats["magnet"] = self.player.magnet_activations
+            
+            self.brain.change(GameOverState(self.brain, self.score, self.arrest_status, self.run_stats))
             return
 
         self.player.check_collisions(self.platforms, self.trash_obstacles, actual_dt)
@@ -379,7 +398,10 @@ class GameState(State):
                     self.player.bounce()
                     self.emitter.enemy_killed(mob.rect.centerx, mob.rect.centery, self.particles)
                     if isinstance(mob, Rat):
+                        self.run_stats["rats"] += 1
                         DeadRat(mob.rect.centerx, mob.rect.bottom, self.all_sprites, play_anim=True, facing_right=mob.facing_right)
+                    elif isinstance(mob, Bird):
+                        self.run_stats["birds"] += 1
                     continue
 
             # Cas particulier Bird/Drone : Collision plus facile
@@ -396,6 +418,10 @@ class GameState(State):
             if hit:
                 # EFFET DU BOUCLIER SUR TOUT LE MONDE
                 if self.player.has_shield:
+                    if isinstance(mob, Rat): self.run_stats["rats"] += 1
+                    elif isinstance(mob, Bird): self.run_stats["birds"] += 1
+                    elif isinstance(mob, Drone): self.run_stats["drones"] += 1
+                    
                     mob.kill()
                     self.score += 10
                     self.emitter.enemy_killed(mob.rect.centerx, mob.rect.centery, self.particles)
