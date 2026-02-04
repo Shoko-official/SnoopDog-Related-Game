@@ -159,6 +159,13 @@ ASSETS = {
     },
 
     "boutique_sets": {
+        "default": {
+            "name": "BASE",
+            "price": 0,
+            "variants": ["default"], 
+            "base_w": 128, "base_h": 128,
+            "fps": 10
+        },
         "knights": {
             "name": "ORDRE DES CHEVALIERS",
             "price": 1500,

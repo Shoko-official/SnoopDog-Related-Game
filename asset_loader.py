@@ -133,6 +133,11 @@ class AssetLoader:
         )
 
     def load_skin_variant(self, variant, scale=1.0):
+        # Petit hack pour le set par défaut
+        if variant == "default" or variant == "player":
+             pl = ASSETS.get("player", {})
+             return {k: self.get_anim("player", k, scale) for k in pl}
+
         # Logique un peu compliquée pour trouver le dossier du skin
         base = os.path.join(str(ASSET_DIR), "graphics/characters/boutique")
         target = None

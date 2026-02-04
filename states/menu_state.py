@@ -129,6 +129,17 @@ class MenuState(State):
                         self.show_shop = False
                         play_sfx("click")
                     
+                    # Echange de weed (Vente)
+                    ws = progression.state.get("weed_stash", 0)
+                    if ws > 0:
+                        exch_btn = pygame.Rect(panel.right - 220, panel.top + 20, 160, 40)
+                        if exch_btn.collidepoint(souris):
+                            gain = int(ws * 8) 
+                            progression.state["credits"] += gain
+                            progression.state["weed_stash"] = 0
+                            progression.commit()
+                            play_sfx("click")
+                    
                     # Clic sur les packs de la boutique
                     from assets_registry import ASSETS
                     sets = ASSETS["boutique_sets"]
@@ -426,6 +437,17 @@ class MenuState(State):
         title = pygame.transform.scale(title, (int(title.get_width() * 0.6), int(title.get_height() * 0.6)))
         surface.blit(title, (panel.left + 30, panel.top + 15))
 
+        # Bouton vente weed
+        ws = progression.state.get("weed_stash", 0)
+        if ws > 0:
+            exch_btn = pygame.Rect(panel.right - 220, panel.top + 20, 160, 40)
+            hover_sell = exch_btn.collidepoint(pygame.mouse.get_pos())
+            col = (100, 255, 100) if hover_sell else (80, 200, 80)
+            pygame.draw.rect(surface, col, exch_btn, border_radius=8)
+            
+            lbl = self.font_rules_body.render(f"VENDRE: {ws} (8$/u)", True, (0, 50, 0))
+            surface.blit(lbl, lbl.get_rect(center=exch_btn.center))
+
         from assets_registry import ASSETS
         sets = ASSETS["boutique_sets"]
         items = ASSETS.get("boutique_items", {})
@@ -580,7 +602,7 @@ class MenuState(State):
             try:
                 if uid == "default":
                     c_id = ASSETS["player"]["idle"]
-                    img = asset_loader.load_sheet(c_id["p"], c_id["w"], c_id["h"], c=1)[0]
+                    img = asset_loader.load_sheet(c_id["p"], c_id["w"], c_id["h"], count=1)[0]
                 elif kind == "set":
                     v_name = ASSETS["boutique_sets"][uid]["variants"][0]
                     anims = asset_loader.load_skin_variant(v_name)

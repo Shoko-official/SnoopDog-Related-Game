@@ -29,7 +29,8 @@ class PlayerProfile:
             "unlocked_items": [],
             "active_skin_set": "default",
             "active_variant": None,
-            "stats": {"total_dist": 0, "total_weed": 0, "total_kills": 0}
+            "stats": {"total_dist": 0, "total_weed": 0, "total_kills": 0},
+            "weed_stash": 0
         }
         self.reload()
 
@@ -94,6 +95,15 @@ class PlayerProfile:
     def update(self, run_data):
         # run_data c'est un dict {'dist': 500, 'weed': 10} etc
         changed = False
+        
+        # On stocke la weed ramassée
+        w = run_data.get("weed", 0)
+        if w > 0:
+            self.state["weed_stash"] = self.state.get("weed_stash", 0) + w
+            # Update stats globales aussi tant qu'à faire
+            self.state["stats"]["total_weed"] += w
+            self.state["stats"]["total_dist"] += run_data.get("dist", 0)
+            changed = True
         
         for q in self.state["quests"]:
             if q["completed"]: continue

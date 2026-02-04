@@ -12,7 +12,7 @@ class GameOverState(State):
         self.status = status
         
         if run_stats:
-            progression.update_progress(run_stats)
+            progression.update(run_stats)
         self.SW = SCREEN_WIDTH
         self.SH = SCREEN_HEIGHT
 
