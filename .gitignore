@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+.DS_Store
+*.exe
+*.bin
+build/
+dist/
+*.spec
