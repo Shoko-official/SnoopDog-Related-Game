@@ -132,7 +132,8 @@ class MenuState(State):
                     # Echange de weed (Vente)
                     ws = progression.state.get("weed_stash", 0)
                     if ws > 0:
-                        exch_btn = pygame.Rect(panel.right - 220, panel.top + 20, 160, 40)
+                        # Position alignée avec le nouveau design
+                        exch_btn = pygame.Rect(panel.right - 200, panel.top + 15, 140, 50)
                         if exch_btn.collidepoint(souris):
                             gain = int(ws * 8) 
                             progression.state["credits"] += gain
@@ -437,16 +438,31 @@ class MenuState(State):
         title = pygame.transform.scale(title, (int(title.get_width() * 0.6), int(title.get_height() * 0.6)))
         surface.blit(title, (panel.left + 30, panel.top + 15))
 
-        # Bouton vente weed
+        # Bouton vente weed mieux intégré
         ws = progression.state.get("weed_stash", 0)
         if ws > 0:
-            exch_btn = pygame.Rect(panel.right - 220, panel.top + 20, 160, 40)
+            # Même rect que dans update()
+            exch_btn = pygame.Rect(panel.right - 200, panel.top + 15, 140, 50)
             hover_sell = exch_btn.collidepoint(pygame.mouse.get_pos())
-            col = (100, 255, 100) if hover_sell else (80, 200, 80)
-            pygame.draw.rect(surface, col, exch_btn, border_radius=8)
             
-            lbl = self.font_rules_body.render(f"VENDRE: {ws} (8$/u)", True, (0, 50, 0))
-            surface.blit(lbl, lbl.get_rect(center=exch_btn.center))
+            # Fond style "terminal financier"
+            bg_col = (20, 50, 30) if hover_sell else (10, 30, 15)
+            pygame.draw.rect(surface, bg_col, exch_btn, border_radius=10)
+            
+            # Bordure néon
+            border_col = (100, 255, 100) if hover_sell else (40, 120, 60)
+            pygame.draw.rect(surface, border_col, exch_btn, width=2, border_radius=10)
+            
+            # Infos
+            gain = ws * 8
+            # Ligne 1 : Action
+            l1 = self.font_btn.render("VENDRE", True, (200, 255, 200))
+            l1 = pygame.transform.scale(l1, (int(l1.get_width() * 0.7), int(l1.get_height() * 0.7)))
+            surface.blit(l1, l1.get_rect(centerx=exch_btn.centerx, top=exch_btn.top + 6))
+            
+            # Ligne 2 : Montant
+            l2 = self.font_rules_body.render(f"{ws}u -> {gain} Cr", True, (100, 255, 100))
+            surface.blit(l2, l2.get_rect(centerx=exch_btn.centerx, bottom=exch_btn.bottom - 6))
 
         from assets_registry import ASSETS
         sets = ASSETS["boutique_sets"]

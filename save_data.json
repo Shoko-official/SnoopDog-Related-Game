@@ -1,5 +1,5 @@
 {
-  "credits": 8000,
+  "credits": 47384,
   "quests": [
     {
       "id": "distance",
@@ -45,12 +45,16 @@
     "fighters",
     "vampires"
   ],
-  "unlocked_items": [],
+  "unlocked_items": [
+    "Kunoichi",
+    "Countess_Vampire"
+  ],
   "active_skin_set": "default",
   "active_variant": null,
   "stats": {
-    "total_dist": 0,
-    "total_weed": 0,
+    "total_dist": 110,
+    "total_weed": 23,
     "total_kills": 0
-  }
+  },
+  "weed_stash": 0
 }
