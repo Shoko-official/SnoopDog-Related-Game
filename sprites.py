@@ -175,9 +175,11 @@ class Player(PhysObj):
                     trash.kill() 
                     continue
                 if self.rect.bottom > trash.rect.top + 20: 
+                    if not self.slowed:
+                        play_sfx("trash_fall", 0.5)
                     self.apply_slow()
-                    self.rect.right = trash.rect.left
-                    play_sfx("trash_fall", 0.5)
+                    # On ne bloque plus, on ralentit juste
+                    # self.rect.right = trash.rect.left
 
         self.check_horizontal_collisions(platforms)
         self.apply_gravity(dt)
@@ -374,8 +376,11 @@ class TrashObstacle(pygame.sprite.Sprite):
         self.mask = get_mask(self.image)
         
         trim_rect = self.image.get_bounding_rect()
-        self.rect = pygame.Rect(0, 0, trim_rect.width, trim_rect.height)
+        # Hitbox encore plus étroite (50% de la largeur) pour éviter de taper "l'air" devant
+        self.rect = pygame.Rect(0, 0, int(trim_rect.width * 0.5), trim_rect.height)
         self.rect.midbottom = (x, y)
+        # On décale un tout petit peu vers l'arrière pour que le contact visuel soit meilleur
+        self.rect.x += 10 
         self.visual_offset_y = 0
 
 class Police(PhysObj):
@@ -597,25 +602,8 @@ class Drone(PhysObj):
 
         self.animate()
         
-        if self.attack_cooldown > 0:
-            self.attack_cooldown -= dt
-            alpha = 100 if int(pygame.time.get_ticks() / 50) % 2 == 0 else 255
-            self.image.set_alpha(alpha)
-            return 
-        
-        if pygame.sprite.collide_mask(self, self.player):
-            self.attack_cooldown = 2.0 
-            if self.player.god_mode:
-                 self.speed_x = -0.5 
-                 self.rect.x += 20 
-                 return
-
-            if not self.player.invincible and not self.player.has_shield:
-                self.player.take_damage(1)
-                self.retreating = True
-                return       
-            elif self.player.has_shield:
-                self.speed_x = -0.5
+        # Note: La collision est maintenant gérée par GameState 
+        # pour éviter les doubles dégâts et gérer le bouclier correctement
 
 class Wolf(PhysObj):
     def __init__(self, groups, x, y, dir_x=-1):

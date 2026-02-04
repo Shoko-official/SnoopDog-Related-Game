@@ -370,7 +370,10 @@ class GameState(State):
                 # Si on est au dessus de ses fesses (bottom < centery)
                 # Correction: Tolérance réduite pour éviter de tuer les rats en marchant dessus
                 # On utilise centery + un petit offset, mais pas 35 px !
-                stomp_threshold = mob.rect.centery + 5
+                stomp_threshold = mob.rect.centery + 10
+                if isinstance(mob, Bird):
+                    stomp_threshold = mob.rect.centery + 40 # Beaucoup plus de marge pour écraser les oiseaux
+                
                 if self.player.rect.bottom < stomp_threshold: 
                     mob.kill()
                     self.player.bounce()
@@ -379,33 +382,35 @@ class GameState(State):
                         DeadRat(mob.rect.centerx, mob.rect.bottom, self.all_sprites, play_anim=True, facing_right=mob.facing_right)
                     continue
 
-        # 2. Dégâts et autres (Mélange Masque et Rect pour les oiseaux)
-        for mob in list(self.mobs):
-            # Shield effect
-            if self.player.has_shield and self.check_mask_collision(self.player, mob):
-                mob.kill()
-                self.score += 10
-                self.emitter.enemy_killed(mob.rect.centerx, mob.rect.centery, self.particles)
-                continue
-
-            # Cas particulier Bird/Drone : On veut que ce soit facile à toucher/se faire toucher
+            # Cas particulier Bird/Drone : Collision plus facile
             is_flying = isinstance(mob, (Bird, Drone))
             hit = False
             
             if is_flying:
-                # Pour les oiseaux, si le rectangle touche vraiment bien, on valide même sans masque
-                # (Car le masque peut être un peu buggé avec les offsets)
                 if self.player.rect.inflate(-10, -10).colliderect(mob.rect):
                     hit = True
             
-            # Sinon on check le masque normal
             if not hit and self.check_mask_collision(self.player, mob):
                 hit = True
 
             if hit:
+                # EFFET DU BOUCLIER SUR TOUT LE MONDE
+                if self.player.has_shield:
+                    mob.kill()
+                    self.score += 10
+                    self.emitter.enemy_killed(mob.rect.centerx, mob.rect.centery, self.particles)
+                    continue
+
                 if isinstance(mob, Drone):
+                    # Il nous touche ? On prend cher + Il se barre
+                    if not self.player.invincible:
+                        self.player.take_damage(1)
+                        
                     self.emitter.drone_hit(self.player.rect.centerx, self.player.rect.centery, self.particles)
                     play_sfx("hurt", 0.4)
+                    
+                    if hasattr(mob, 'retreating'):
+                        mob.retreating = True
                 else:
                     if self.player.take_damage(1):
                         self.trigger_death("WASTED")
