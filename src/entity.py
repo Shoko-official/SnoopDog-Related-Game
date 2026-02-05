@@ -19,12 +19,17 @@ class PhysObj(pygame.sprite.Sprite):
         self.image = pygame.Surface((32, 32))
         self.rect = self.image.get_rect(midbottom=(x, y))
 
+        self.just_hit_wall = False
+        self.just_jumped = False
+        self.is_falling = False
+
     def apply_gravity(self, dt):
-        # Gravité
         self.velocity_y += GRAVITY * dt
         self.rect.y += self.velocity_y * dt
+        self.is_falling = self.velocity_y > 0
 
     def check_platform_collisions(self, platforms):
+        self.just_hit_wall = False
         hits = pygame.sprite.spritecollide(self, platforms, False)
         for hit in hits:
             if self.velocity_y > 0:
@@ -34,6 +39,8 @@ class PhysObj(pygame.sprite.Sprite):
             elif self.velocity_y < 0:
                 self.rect.top = hit.rect.bottom
                 self.velocity_y = 0
+            else: 
+                self.just_hit_wall = True
 
     def check_horizontal_collisions(self, platforms):
         hits = pygame.sprite.spritecollide(self, platforms, False)

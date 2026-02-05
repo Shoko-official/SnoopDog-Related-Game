@@ -2,8 +2,7 @@ import os
 from pathlib import Path
 import sys
 
-# Setup crado pour PyInstaller
-# Setup crado pour PyInstaller
+# Setup pour PyInstaller
 BASE_DIR = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent.parent
 ASSET_DIR = BASE_DIR / 'assets'
 
@@ -13,8 +12,12 @@ SCREEN_HEIGHT = 720
 FPS = 60
 TITLE = "Get What U Need - Bad Trip Edition"
 
-# --- PHYSIQUE ---
-# Faut que ça saute bien, pas trop flottant
+# --- RL CONFIGURATION ---
+AI_MAX_Distance = 1500.0 # Dist max de la vision
+AI_MAX_VELOCITY = 2000.0 # pr la normalisation
+AI_FRAME_RATE = 60 # fréquence de décision (modifier selon résultats)
+
+# PHYSIQUE ---
 GRAVITY = 2000 
 PLAYER_SPEED = 350 
 JUMP_FORCE = -1150 
@@ -33,7 +36,7 @@ RAT_SPEED = 100
 BIRD_SPEED = 120
 BIRD_AMPLITUDE = 50
 
-# Gestion du MANQUE (La barre de vie alternative)
+# Gestion du MANQUE
 WITHDRAWAL_RATE = 0.05 # Vitesse a laquelle ça monte
 MAX_WITHDRAWAL = 100
 WEED_WITHDRAWAL_REDUCE = 15 # Combien on recup par pochon
