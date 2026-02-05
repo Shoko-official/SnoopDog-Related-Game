@@ -31,7 +31,9 @@ class PlayerProfile:
             "active_variant": None,
             "stats": {"total_dist": 0, "total_weed": 0, "total_kills": 0},
             "weed_stash": 0,
-            "best_distance": 0
+            "best_distance": 0,
+            "volume_music": 0.2,
+            "volume_sfx": 1.0
         }
         self.reload()
 
