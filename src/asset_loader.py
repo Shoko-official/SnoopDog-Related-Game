@@ -222,6 +222,12 @@ class AssetLoader:
             if path:
                 s = self.fetch_snd(path)
                 if s:
+                    # Appliquer le multiplicateur de volume SFX global à partir des paramètres
+                    try:
+                        from progression import progression
+                        global_vol = progression.state.get("volume_sfx", 1.0)
+                        s.set_volume(vol * global_vol)
+                    except:
                     s.set_volume(vol)
                     s.play()
         except KeyError:
