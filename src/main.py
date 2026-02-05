@@ -21,6 +21,7 @@ class Game:
             print(f"Impossible de charger l'icône : {e}")
         
         # On définit l'écran en premier
+        self.fullscreen = False
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption(TITLE)
         
@@ -44,7 +45,12 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT:
                     self.running = False
-            
+                    
+                # F11 pour toggle fullscreen
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_F11:
+                        self.toggle_fullscreen()
+                        
             # Mise à jour et dessin de l'état actuel
             self.brain.update(dt, events)
             
@@ -55,6 +61,14 @@ class Game:
             
         self.quit()
 
+    def toggle_fullscreen(self):
+        # Bascule entre plein écran et mode fenêtré
+        self.fullscreen = not self.fullscreen
+        if self.fullscreen:
+            self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+        else:
+            self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    
     def quit(self):
         # On nettoie tout avant de se barrer
         asset_loader.clear()
