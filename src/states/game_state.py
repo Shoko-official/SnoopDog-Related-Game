@@ -54,7 +54,9 @@ class GameState(State):
             if not pygame.mixer.get_init(): return
             p = str(ASSET_DIR / ASSETS["audio"]["music_bg"])
             pygame.mixer.music.load(p)
-            pygame.mixer.music.set_volume(MUSIC_VOLUME)
+            from progression import progression
+            vol = progression.state.get("volume_music", MUSIC_VOLUME)
+            pygame.mixer.music.set_volume(vol)
             pygame.mixer.music.play(-1)
         except: pass
 
