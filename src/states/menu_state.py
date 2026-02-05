@@ -878,10 +878,10 @@ class MenuState(State):
             if q["completed"] and not q["claimed"]:
                 btn_r = pygame.Rect(rect.right - 140, rect.bottom - 50, 120, 35)
                 h_btn = btn_r.collidepoint(souris)
-                
+
                 b_c = (50, 200, 100) if h_btn else (30, 120, 60)
                 pygame.draw.rect(surface, b_c, btn_r, border_radius=8)
-                
+
                 t_btn = self.font_rules_body.render("RÉCUPÉRER", True, (10, 30, 10))
                 surface.blit(t_btn, t_btn.get_rect(center=btn_r.center))
             else:
@@ -890,7 +890,7 @@ class MenuState(State):
                 r_surf = self.font_price.render(r_txt, True, r_col)
                 surface.blit(r_surf, (rect.right - r_surf.get_width() - 20, rect.bottom - 35))
 
-def _draw_audio_panel(self, surface):
+    def _draw_audio_panel(self, surface):
         panel = self._panel_rect()
 
         # Fond Glassmorphism
