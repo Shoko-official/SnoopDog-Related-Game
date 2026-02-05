@@ -27,6 +27,9 @@ class Game:
         
         # Le son !!!
         pygame.mixer.init() 
+
+        # Lancer la musique dès le démarrage
+        self.init_music()
         
         self.clock = pygame.time.Clock()
         self.running = True
@@ -61,6 +64,27 @@ class Game:
             
         self.quit()
 
+    def init_music(self):
+        # Lance la musique de fond dès le démarrage
+        try:
+            if not pygame.mixer.get_init():
+                return
+
+            from assets_registry import ASSETS
+            from progression import progression
+
+            music_path = ASSET_DIR / ASSETS["audio"]["music_bg"]
+            pygame.mixer.music.load(str(music_path))
+
+            # Applique le volume sauvegardé
+            vol = progression.state.get("volume_music", 0.2)
+            pygame.mixer.music.set_volume(vol)
+
+            # Joue en boucle infinie
+            pygame.mixer.music.play(-1)
+        except Exception as e:
+            print(f"Impossible de charger la musique : {e}")
+    
     def toggle_fullscreen(self):
         # Bascule entre plein écran et mode fenêtré
         self.fullscreen = not self.fullscreen
