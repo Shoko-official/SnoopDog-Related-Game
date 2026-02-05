@@ -1,60 +1,15 @@
 {
-  "credits": 48854,
-  "quests": [
-    {
-      "id": "distance",
-      "title": "Marathonien",
-      "desc": "Parcours 1173m dans le ghetto",
-      "goal": 1173,
-      "current": 876,
-      "reward": 150,
-      "goal_type": "dist",
-      "completed": false,
-      "claimed": false
-    },
-    {
-      "id": "kill_birds",
-      "title": "Chasseur urbain",
-      "desc": "Élimine 9 pigeons/oiseaux",
-      "goal": 9,
-      "current": 3,
-      "reward": 130,
-      "goal_type": "birds",
-      "completed": false,
-      "claimed": false
-    },
-    {
-      "id": "kill_drones",
-      "title": "Cyber-Guerrier",
-      "desc": "Détruis 3 drones de surveillance",
-      "goal": 3,
-      "current": 1,
-      "reward": 250,
-      "goal_type": "drones",
-      "completed": false,
-      "claimed": false
-    }
-  ],
+  "credits": 0,
+  "quests": [],
   "unlocked_sets": [
-    "default",
-    "knights",
-    "werewolves",
-    "ninja_monk",
-    "kunoichi",
-    "samurai",
-    "fighters",
-    "vampires"
+    "default"
   ],
-  "unlocked_items": [
-    "Kunoichi",
-    "Countess_Vampire",
-    "Shinobi"
-  ],
-  "active_skin_set": "samurai",
-  "active_variant": "Samurai",
+  "unlocked_items": [],
+  "active_skin_set": "default",
+  "active_variant": null,
   "stats": {
-    "total_dist": 709,
-    "total_weed": 138,
+    "total_dist": 0,
+    "total_weed": 0,
     "total_kills": 0
   },
   "weed_stash": 0

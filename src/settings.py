@@ -3,7 +3,8 @@ from pathlib import Path
 import sys
 
 # Setup crado pour PyInstaller
-BASE_DIR = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent
+# Setup crado pour PyInstaller
+BASE_DIR = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent.parent
 ASSET_DIR = BASE_DIR / 'assets'
 
 # --- ECRAN & RENDU ---
