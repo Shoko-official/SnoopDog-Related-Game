@@ -1,6 +1,7 @@
 import pygame
 import random
-from settings import HEART_SIZE, WITHDRAWAL_BAR_WIDTH
+import math
+from settings import HEART_SIZE, WITHDRAWAL_BAR_WIDTH, SCREEN_WIDTH, SCREEN_HEIGHT
 from asset_loader import asset_loader
 from assets_registry import ASSETS
 
@@ -296,3 +297,19 @@ class ParallaxBackground:
         sw = surface.get_width()
         for layer in self.layers:
             layer.draw(surface, camera_x, sw)
+
+class DayNightCycle:
+    def __init__(self):
+        self.time = 0
+        self.duration = 10000  # Vitesse du cycle
+        self.surface = pygame.Surface((1280, 720), pygame.SRCALPHA) 
+        
+    def update(self, dt):
+        self.time += dt * 100
+        if self.time > self.duration:
+            self.time = 0
+            
+    def draw(self, screen):
+        alpha = int(110 * (1 + math.sin(self.time / 1000))) 
+        self.surface.fill((15, 15, 45, alpha)) # Couleur nuit
+        screen.blit(self.surface, (0, 0))
