@@ -378,6 +378,16 @@ class MenuState(State):
         surf = self.font_btn.render(txt, True, (255, 230, 0))
         surface.blit(surf, (self.SW - surf.get_width() - margin, margin))
 
+        # Meilleur score en dessous
+        best = progression.state.get("best_distance", 0)
+        best_txt = f"RECORD : {best}m"
+        best_glow = self.font_rules_body.render(best_txt, True, (100, 200, 100))
+        for dx, dy in [(-1,0),(1,0),(0,-1),(0,1)]:
+            surface.blit(best_glow, (self.SW - best_glow.get_width() - margin + dx, margin + 40 + dy))
+
+        best_surf = self.font_rules_body.render(best_txt, True, (150, 255, 150))
+        surface.blit(best_surf, (self.SW - best_surf.get_width() - margin, margin + 40))
+    
     def _draw_button(self, surface, rect, texte, souris):
         # On anime un peu au survol
         survole = rect.collidepoint(souris) and not (self.show_rules or self.show_missions or self.show_shop or self.show_locker)
