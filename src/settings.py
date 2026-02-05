@@ -1,10 +1,14 @@
+# Config globale
 import os
 from pathlib import Path
 import sys
 
-# Setup pour PyInstaller
-BASE_DIR = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent.parent
-ASSET_DIR = BASE_DIR / 'assets'
+# Chemins
+# Dossier source actuel
+SRC_DIR = Path(__file__).resolve().parent
+# Racine du projet (un cran au dessus de src/)
+BASE_DIR = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else SRC_DIR.parent
+ASSET_DIR = Path(BASE_DIR / 'assets').resolve()
 
 # --- ECRAN & RENDU ---
 SCREEN_WIDTH = 1280
@@ -12,12 +16,12 @@ SCREEN_HEIGHT = 720
 FPS = 60
 TITLE = "Get What U Need - Bad Trip Edition"
 
-# --- RL CONFIGURATION ---
+# RL CONFIGURATION
 AI_MAX_Distance = 1500.0 # Dist max de la vision
 AI_MAX_VELOCITY = 2000.0 # pr la normalisation
 AI_FRAME_RATE = 60 # fréquence de décision (modifier selon résultats)
 
-# PHYSIQUE ---
+# PHYSIQUE
 GRAVITY = 2000 
 PLAYER_SPEED = 350 
 JUMP_FORCE = -1150 

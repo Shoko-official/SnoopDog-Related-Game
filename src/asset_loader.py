@@ -1,5 +1,6 @@
 import pygame
 import os
+from pathlib import Path
 # Fusionné avec le code de Shoko (A)
 # Gestion des imports un peu fragile si le dossier est pas propre
 try:
@@ -20,101 +21,79 @@ except ImportError:
 
 class AssetLoader:
     def __init__(self):
-        # On stocke tout ici pour pas recharger 50 fois la même image
-        self.cache_img = {}
-        self.cache_snd = {}
-        self.cache_anim = {}
-        self.silent = False # Pour couper les logs d'erreurs
+        # Le cache pour pas tout charger en boucle
+        self.cache_img, self.cache_snd, self.cache_anim = {}, {}, {}
+        self.silent = False
 
     def fetch_img(self, chemin, alpha=True):
-        """ Charge une image et la met en cache. Renvoie un carré rose si ça plante. """
-        chemin = str(chemin)
-        # On normalise le path pour éviter les galères Windows/Linux
-        full_path = os.path.join(str(ASSET_DIR), chemin)
+        # On passe par Path pour pas s'embêter avec les slashs/backslashs
+        p_ch = Path(chemin)
+        full_path = ASSET_DIR / p_ch
+        s_path = str(full_path.absolute())
         
-        if full_path in self.cache_img:
-            return self.cache_img[full_path]
+        if s_path in self.cache_img: return self.cache_img[s_path]
             
-        # Si le fichier existe pas, on gagne du temps
-        if not os.path.isfile(full_path):
-            return self._get_placeholder(full_path)
+        if not full_path.exists(): return self._get_placeholder(s_path)
 
         try:
-            surf = pygame.image.load(full_path)
-            # Optimisation indispensable pour pygame
-            if alpha:
-                surf = surf.convert_alpha()
-            else:
-                surf = surf.convert()
+            surf = pygame.image.load(s_path)
+            # On optimise seulement si l'écran est lancé
+            if pygame.display.get_init() and pygame.display.get_surface():
+                surf = surf.convert_alpha() if alpha else surf.convert()
             
-            self.cache_img[full_path] = surf
+            self.cache_img[s_path] = surf
             return surf
-        except Exception as e:
-            return self._get_placeholder(full_path)
+        except:
+            return self._get_placeholder(s_path)
 
     def _get_placeholder(self, ref):
-        # Juste pour debug sans faire crasher le jeu
-        if not self.silent:
-            print(f"[Assets] Texture manquante : {ref}")
-        
-        pink_sq = pygame.Surface((32, 32))
-        pink_sq.fill((255, 0, 255))
-        return pink_sq
+        # Texture manquante -> on met un carré rose pour alerter
+        if not self.silent: print(f"[Assets] Erreur texture : {ref}")
+        pink = pygame.Surface((32, 32))
+        pink.fill((255, 0, 255))
+        return pink
 
     def fetch_snd(self, chemin):
-        if not pygame.mixer.get_init():
-            return None # Pas de son, pas de problème
+        if not pygame.mixer.get_init(): return None
             
-        full_path = os.path.join(str(ASSET_DIR), str(chemin))
+        full_path = ASSET_DIR / Path(chemin)
+        s_path = str(full_path.absolute())
         
-        if full_path in self.cache_snd:
-            return self.cache_snd[full_path]
+        if s_path in self.cache_snd: return self.cache_snd[s_path]
 
-        if os.path.exists(full_path):
+        if full_path.exists():
             try:
-                snd = pygame.mixer.Sound(full_path)
-                self.cache_snd[full_path] = snd
+                snd = pygame.mixer.Sound(s_path)
+                self.cache_snd[s_path] = snd
                 return snd
             except:
-                print(f"[Assets] Fichier son corrompu : {full_path}")
-        
+                print(f"[Assets] Son pété : {s_path}")
         return None
 
     def load_sheet(self, chemin, w, h, count=None, scale=1.0):
-        # Clé unique pour le cache d'anim
+        # Cache d'anim via une clé unique
         uid = f"{chemin}_{w}_{h}_{scale}"
-        if uid in self.cache_anim:
-            return self.cache_anim[uid]
+        if uid in self.cache_anim: return self.cache_anim[uid]
 
-        source = self.fetch_img(chemin)
-        sw, sh = source.get_size()
+        src = self.fetch_img(chemin)
+        sw, sh = src.get_size()
         
-        # Si w est 0 (config foireuse), on évite la division par zéro
         if w < 1: w = 32
-        
-        # Si pas de count défini, on prend toute la largeur
-        total = count if count else (sw // w)
+        nb = count if count else (sw // w)
         
         frames = []
-        for i in range(int(total)):
-            # Calcul de la zone à découper
-            x_pos = i * w
-            if x_pos + w > sw: break # On sort si ça dépasse
+        for i in range(int(nb)):
+            x = i * w
+            if x + w > sw: break
             
-            rect = (x_pos, 0, w, min(h, sh))
             try:
-                sub = source.subsurface(rect)
+                sub = src.subsurface((x, 0, w, min(h, sh)))
                 if scale != 1.0:
-                    target_size = (int(w * scale), int(h * scale))
-                    sub = pygame.transform.scale(sub, target_size)
+                    sub = pygame.transform.scale(sub, (int(w * scale), int(h * scale)))
                 frames.append(sub)
-            except ValueError:
-                continue # Skip les frames buggées
+            except: continue
         
-        # Sécurité : faut jamais renvoyer une liste vide
-        if not frames:
-            frames = [source]
-
+        if not frames: frames = [src]
         self.cache_anim[uid] = frames
         return frames
 
@@ -139,7 +118,7 @@ class AssetLoader:
              return {k: self.get_anim("player", k, scale) for k in pl}
 
         # Logique un peu compliquée pour trouver le dossier du skin
-        base = os.path.join(str(ASSET_DIR), "graphics/characters/boutique")
+        base = os.path.normpath(os.path.join(str(ASSET_DIR), "graphics/characters/boutique"))
         target = None
         
         # On check d'abord si c'est un dossier direct
@@ -159,13 +138,11 @@ class AssetLoader:
         if not target:
             target = f"graphics/characters/boutique/{variant}"
 
-        # Helper local pour charger une anim spécifique
+        # Helper local pour charger une anim par fichier
         def _load(name):
             p = f"{target}/{name}"
-            # Petite astuce : on check si le fichier existe avant de lancer le loader
-            # pour éviter de spammer la console d'erreurs
-            real_p = os.path.join(str(ASSET_DIR), p)
-            if not os.path.exists(real_p):
+            # On vérifie sur le disque avant pour pas spammer de logs
+            if not os.path.exists(os.path.normpath(os.path.join(str(ASSET_DIR), p))):
                 return None
             
             self.silent = True
@@ -173,8 +150,7 @@ class AssetLoader:
             self.silent = False
             return res
 
-        # On construit le dico d'animations
-        # L'ordre est important pour les fallbacks (Dead -> Hurt, Idle -> Run)
+        # On fait le dico dans l'ordre de priorité (Idle -> Run si manque)
         anims = {}
         anims["run"] = _load("Run.png")
         anims["idle"] = _load("Idle.png") or anims["run"]
@@ -183,49 +159,47 @@ class AssetLoader:
         anims["hurt"] = _load("Hurt.png")
         anims["dead"] = _load("Dead.png") or anims["hurt"]
         
-        # Nettoyage des clés vides
         return {k: v for k, v in anims.items() if v}
 
     def load_player(self, scale=1.0):
-        # Attention : import local obligatoire ici pour éviter cycle
-        # progression.py importe souvent asset_loader
+        # Import local pour pas faire de boucle d'imports
         try:
             from progression import progression
-            skin = progression.state.get("active_skin_set", "default")
+            sk = progression.state.get("active_skin_set", "default")
         except:
-            skin = "default"
+            sk = "default"
 
-        # 1. Skin de base
-        if skin == "default":
-            pl_assets = ASSETS.get("player", {})
-            return {k: self.get_anim("player", k, scale) for k in pl_assets}, 0.15
+        # 1. Skin d'origine
+        if sk == "default":
+            pl = ASSETS.get("player", {})
+            return {k: self.get_anim("player", k, scale) for k in pl}, 0.15
 
-        # 2. C'est un set complet ?
+        # 2. Set de la boutique
         sets = ASSETS.get("boutique_sets", {})
-        if skin in sets:
-            cfg = sets[skin]
+        if sk in sets:
+            cfg = sets[sk]
             try:
                 from progression import progression
-                # On prend la variante active ou la première
-                var = progression.state.get("active_variant", cfg["variants"][0])
+                # On check la variante choisie
+                v = progression.state.get("active_variant", cfg["variants"][0])
             except:
-                var = cfg.get("variants", ["default"])[0]
+                v = cfg.get("variants", ["default"])[0]
                 
-            return self.load_skin_variant(var, scale), (cfg.get("fps", 10) / 60.0)
+            return self.load_skin_variant(v, scale), (cfg.get("fps", 10) / 60.0)
 
-        # 3. C'est un item isolé ?
-        items = ASSETS.get("boutique_items", {})
-        if skin in items:
-            cfg = items[skin]
+        # 3. Juste un item
+        it = ASSETS.get("boutique_items", {})
+        if sk in it:
+            cfg = it[sk]
             return self.load_skin_variant(cfg.get("var"), scale), (cfg.get("fps", 10) / 60.0)
             
-        # Fallback ultime
-        return self.load_player(scale) if skin != "default" else ({}, 0.15)
+        # Fallback au cas où
+        return self.load_player(scale) if sk != "default" else ({}, 0.15)
 
     def load_police(self, scale=1.0):
-        # Charge tous les assets définis dans la catégorie police
-        pol = ASSETS.get("police", {})
-        return {k: self.get_anim("police", k, scale) for k in pol}
+        # Charge tout ce qui est étiqueté police
+        pols = ASSETS.get("police", {})
+        return {k: self.get_anim("police", k, scale) for k in pols}
 
     def load_drone(self, model, scale=1.0):
         # Les drones sont définis par modèle dans le registre

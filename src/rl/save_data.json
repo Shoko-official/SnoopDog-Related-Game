@@ -1,0 +1,47 @@
+{
+  "credits": 0,
+  "quests": [
+    {
+      "id": "drones",
+      "title": "Cyber-Guerrier",
+      "desc": "Détruis 4 drones",
+      "goal": 4,
+      "current": 0,
+      "reward": 250,
+      "completed": false,
+      "claimed": false
+    },
+    {
+      "id": "dist",
+      "title": "Marathonien",
+      "desc": "Parcours 1093m",
+      "goal": 1093,
+      "current": 0,
+      "reward": 150,
+      "completed": false,
+      "claimed": false
+    },
+    {
+      "id": "weed",
+      "title": "Grossiste",
+      "desc": "Collecte 43 pochons",
+      "goal": 43,
+      "current": 0,
+      "reward": 100,
+      "completed": false,
+      "claimed": false
+    }
+  ],
+  "unlocked_sets": [
+    "default"
+  ],
+  "unlocked_items": [],
+  "active_skin_set": "default",
+  "active_variant": null,
+  "stats": {
+    "total_dist": 0,
+    "total_weed": 0,
+    "total_kills": 0
+  },
+  "weed_stash": 0
+}
