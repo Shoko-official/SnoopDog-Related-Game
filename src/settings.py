@@ -19,6 +19,7 @@ GRAVITY = 2000
 PLAYER_SPEED = 350 
 JUMP_FORCE = -1150 
 BOUNCE_FORCE = -600  # Rebond sur les ennemis
+FAST_FALL_FORCE = 900  # Boost vers le bas en appuyant flèche bas en l'air
 FLOOR_Y = 650 
 DEATH_Y = SCREEN_HEIGHT + 200 
 
