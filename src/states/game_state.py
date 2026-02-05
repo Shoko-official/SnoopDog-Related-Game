@@ -232,7 +232,7 @@ class GameState(State):
         self.player.update_powerups(actual_dt, self.weed_items); self.particles.update()
         for sprite in self.all_sprites:
             if sprite.rect.right < self.camera_x - 400 or sprite.rect.top > SCREEN_HEIGHT + 400:
-                # Si c'est un mob qui dégage, c'est qu'on l'a évité proprement
+                # Si c'est un mob qui part, c'est qu'on l'a évité proprement
                 if sprite in self.mobs:
                     self.player.just_dodged_enemy = True
                 sprite.kill()
@@ -277,7 +277,6 @@ class GameState(State):
                     if hasattr(m, 'retreating'): m.retreating = True
                 else: 
                     if self.player.take_damage(1): self.trigger_death("WASTED")
-                    self.player.just_took_damage = True
         c_rect = self.player.rect.inflate(60, 60)
         for w in self.weed_items:
             if c_rect.colliderect(w.rect):

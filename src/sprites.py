@@ -206,6 +206,7 @@ class Player(PhysObj):
             self.invincible = True
             self.invincibility_timer = self.invincibility_duration
             self.just_damaged = True
+            self.just_took_damage = True
             
             # Reset des bonus
             self.combo_counter = 0
@@ -275,6 +276,7 @@ class Player(PhysObj):
                 if self.rect.bottom <= hit.rect.bottom: 
                     self.rect.bottom = hit.rect.top
                     self.velocity_y = 0
+                    if not self.on_ground: self.just_landed = True
                     self.on_ground = True
 
     def activate_powerup(self, p_type):
