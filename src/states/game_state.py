@@ -188,7 +188,7 @@ class GameState(State):
             if pattern_type == 'gap':
                 gap_w = random.randint(GAP_SIZE_MIN, GAP_SIZE_MAX)
                 self.last_gen_x += gap_w
-                if random.random() < 0.5:
+                if random.random() < 0.25:
                     Weed(self.last_gen_x - gap_w/2, FLOOR_Y - 100).add(self.all_sprites, self.weed_items)
             
             elif pattern_type == 'platform':
@@ -205,7 +205,8 @@ class GameState(State):
                 self.platforms.add(plat)
                 self.all_sprites.add(plat)
                 
-                Weed(plat_x + plat_w/2, plat_y).add(self.all_sprites, self.weed_items)
+                if random.random() < 0.4:
+                    Weed(plat_x + plat_w/2, plat_y).add(self.all_sprites, self.weed_items)
                 
                 if random.random() < 0.2:
                     p_type = random.choice(["magnet", "shield"])
@@ -233,7 +234,7 @@ class GameState(State):
     def spawn_decor(self, x_start, width):
         if random.random() < 0.3:
             self.spawn_props(x_start, width)
-        for _ in range(random.randint(0, 2)):
+        for _ in range(random.randint(0, 1)):
              wx = x_start + random.randint(20, width - 20)
              Weed(wx, FLOOR_Y).add(self.all_sprites, self.weed_items)
 
