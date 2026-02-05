@@ -11,6 +11,7 @@ Un endless runner 2D dark & gritty où vous devez fuir dans la rue, collecter de
 | **Flèche Haut / Espace** | Sauter |
 | **Flèche Bas** | Descendre vite (en l'air) |
 | **P / Echap** | Pause |
+| **F11** | Plein écran / Mode fenêtré |
 
 ### Touches de débogage (cheat)
 
