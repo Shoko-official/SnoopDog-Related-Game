@@ -228,8 +228,9 @@ class AssetLoader:
                         global_vol = progression.state.get("volume_sfx", 1.0)
                         s.set_volume(vol * global_vol)
                     except:
-                    s.set_volume(vol)
-                    s.play()
+                        s.set_volume(vol)
+                        s.play()
+                    
         except KeyError:
             pass # Clé audio manquante, pas grave
 
