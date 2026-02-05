@@ -158,8 +158,13 @@ class Player(PhysObj):
         if self.god_mode: return
         
         # Augmente le manque petit à petit
-        self.withdrawal = min(self.withdrawal + WITHDRAWAL_RATE, self.max_withdrawal)
-        
+        if self.withdrawal >= self.max_withdrawal:
+             if not hasattr(self, '_last_at_max_withdrawal') or not self._last_at_max_withdrawal:
+                 self.just_reached_max_withdrawal = True
+             self._last_at_max_withdrawal = True
+        else:
+             self._last_at_max_withdrawal = False
+             
         # Ralentit le joueur si trop en manque
         ratio = self.withdrawal / self.max_withdrawal
         factor = 1.0
@@ -167,7 +172,24 @@ class Player(PhysObj):
              factor = 1.0 - ((ratio - 0.5) * 0.8)
 
         slow = 0.5 if self.slowed else 1.0
-        self.speed = (PLAYER_SPEED + self.speed_boost) * factor * slow * self.global_speed_mult
+        new_speed = (PLAYER_SPEED + self.speed_boost) * factor * slow * self.global_speed_mult
+        
+        # Reward speed thresholds
+        if new_speed >= (PLAYER_SPEED + MAX_SPEED_BOOST) * 0.95:
+             if not hasattr(self, '_last_at_max_speed') or not self._last_at_max_speed:
+                 self.just_reached_max_speed = True
+             self._last_at_max_speed = True
+        else:
+             self._last_at_max_speed = False
+             
+        if new_speed <= PLAYER_SPEED * 0.3:
+             if not hasattr(self, '_last_at_min_speed') or not self._last_at_min_speed:
+                 self.just_reached_min_speed = True
+             self._last_at_min_speed = True
+        else:
+             self._last_at_min_speed = False
+
+        self.speed = new_speed
     
     def apply_slow(self):
         self.slowed = True
@@ -192,6 +214,7 @@ class Player(PhysObj):
             if self.hp <= 0:
                 self.hp = 0
                 return True # Mort trigger
+            if self.hp == 1: self.just_reached_min_hp = True
             play_sfx("hurt", 0.6)
         return False
 
@@ -208,6 +231,7 @@ class Player(PhysObj):
         self.is_jumping = True
         self.on_ground = False
         self.combo_counter += 1
+        if self.combo_counter >= 5: self.just_reached_max_combo = True
         play_sfx("jump", 0.3)
 
     def apply_gravity(self, dt):
@@ -347,6 +371,18 @@ class Player(PhysObj):
                     self.frame_index = len(anim) - 1 # Bloque sur la dernière frame
                 else:
                     self.frame_index = 0
+        
+        # indicateurs de retrait et combinaison minimum
+        if self.withdrawal <= 5: 
+            if not hasattr(self, '_last_at_min_withdrawal') or not self._last_at_min_withdrawal:
+                self.just_reached_min_withdrawal = True
+            self._last_at_min_withdrawal = True
+        else:
+            self._last_at_min_withdrawal = False
+            
+        if self.combo_counter == 0 and hasattr(self, '_old_combo') and self._old_combo > 0:
+            self.just_reached_min_combo = True
+        self._old_combo = self.combo_counter
                     
         self.image = anim[int(self.frame_index)].copy()
         self.mask = get_mask(self.image)

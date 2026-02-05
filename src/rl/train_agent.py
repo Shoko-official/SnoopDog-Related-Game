@@ -7,6 +7,10 @@ from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 
+import sys
+# On ajoute le dossier src au path pour que les imports fonctionnent depuis la racine
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 # On importe les trucs du projet
 from rl.env import GetMyWeedEnv
 
@@ -60,7 +64,7 @@ def train():
         print("ATTENTION: Pas de CUDA trouvé, ça va ramer sévère.")
 
     # Params du cerveau (MlpPolicy classique)
-    policy_kwargs = dict(net_arch=dict(pi=[256, 256], qf=[256, 256]))
+    policy_kwargs = dict(net_arch=dict(pi=[256, 256], vf=[256, 256]))
     
     # On check si on peut reprendre un entraînement existant
     model_path = f"{MODELS_DIR}/weed_bot_final.zip"

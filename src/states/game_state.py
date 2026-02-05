@@ -135,7 +135,8 @@ class GameState(State):
                 g = Obstacle(self.last_gen_x, FLOOR_Y, w, 200, biome=self.current_biome)
                 self.platforms.add(g); self.all_sprites.add(g)
                 # Petite plateforme en l'air
-                pw, px = random.randint(150, 300), self.last_gen_x + random.randint(50, w - pw - 50)
+                pw = random.randint(150, 300)
+                px = self.last_gen_x + random.randint(50, w - pw - 50)
                 py = FLOOR_Y - PLATFORM_HEIGHT
                 pl = Obstacle(px, py, pw, 40, biome=self.current_biome)
                 self.platforms.add(pl); self.all_sprites.add(pl)
@@ -251,7 +252,7 @@ class GameState(State):
                 seuil = m.rect.centery + 10
                 if isinstance(m, Bird): seuil = m.rect.centery + 40
                 if self.player.rect.bottom < seuil: 
-                    m.kill(); self.player.bounce()
+                    m.kill(); self.player.bounce(); self.player.just_hit_enemy = True
                     self.emitter.enemy_killed(m.rect.centerx, m.rect.centery, self.particles)
                     if isinstance(m, Rat):
                         self.run_stats["rats"] += 1
@@ -264,23 +265,33 @@ class GameState(State):
                     if isinstance(m, Rat): self.run_stats["rats"] += 1
                     elif isinstance(m, Bird): self.run_stats["birds"] += 1
                     elif isinstance(m, Drone): self.run_stats["drones"] += 1
-                    m.kill(); self.score += 10; self.emitter.enemy_killed(m.rect.centerx, m.rect.centery, self.particles); continue
+                    m.kill(); self.score += 10; self.player.just_hit_enemy = True
+                    self.emitter.enemy_killed(m.rect.centerx, m.rect.centery, self.particles); continue
                 if isinstance(m, Drone):
                     if not self.player.invincible: self.player.take_damage(1)
                     self.emitter.drone_hit(self.player.rect.centerx, self.player.rect.centery, self.particles); play_sfx("hurt", 0.4)
                     if hasattr(m, 'retreating'): m.retreating = True
                 else: 
                     if self.player.take_damage(1): self.trigger_death("WASTED")
+                    self.player.just_took_damage = True
         c_rect = self.player.rect.inflate(60, 60)
         for w in self.weed_items:
             if c_rect.colliderect(w.rect):
                 w.kill(); self.emitter.weed_collected(w.rect.centerx, w.rect.centery, self.particles)
                 self.player.weed_count += 1; self.player.withdrawal = max(0, self.player.withdrawal - WEED_WITHDRAWAL_REDUCE)
+                self.player.just_collected_weed = True
                 self.player.just_healed = True; play_sfx("click", 0.2)
         for p in self.powerups:
             if c_rect.colliderect(p.rect):
                 p.kill(); self.player.activate_powerup(p.type)
-                self.player.hp = min(self.player.hp + 1, self.player.max_hp) if p.type == "heart" else self.player.hp
+                if p.type == "shield": self.player.just_used_shield = True
+                elif p.type == "magnet": self.player.just_used_magnet = True
+                
+                if p.type == "heart":
+                    if self.player.hp < self.player.max_hp:
+                        self.player.hp += 1
+                        if self.player.hp == self.player.max_hp: self.player.just_reached_max_hp = True
+                    
                 self.emitter.heal_effect(p.rect.centerx, p.rect.centery, self.particles)
         if pygame.sprite.collide_mask(self.player, self.police) and not self.death_triggered and not self.player.god_mode:
              if self.player.has_shield:
@@ -304,6 +315,7 @@ class GameState(State):
                  self.player.has_shield, self.player.invincible, self.player.invincibility_timer = False, True, 60; return
             self.death_triggered, self.arrest_status = True, res
             self.player.status, self.player.frame_index, self.player.direction.x = 'dead', 0, 0
+            self.player.just_died = True
             self.police.status = 'idle'
             play_sfx("arrest" if res == "ARRESTED" else "game_over", 0.8)
 
