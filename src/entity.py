@@ -21,6 +21,7 @@ class PhysObj(pygame.sprite.Sprite):
 
         self.just_hit_wall = False
         self.just_jumped = False
+        self.just_landed = False
         self.is_falling = False
 
     def apply_gravity(self, dt):
@@ -30,11 +31,14 @@ class PhysObj(pygame.sprite.Sprite):
 
     def check_platform_collisions(self, platforms):
         self.just_hit_wall = False
+        self.just_landed = False
         hits = pygame.sprite.spritecollide(self, platforms, False)
         for hit in hits:
             if self.velocity_y > 0:
                 self.rect.bottom = hit.rect.top
                 self.velocity_y = 0
+                if not self.on_ground:
+                    self.just_landed = True # Hop, on a touché le sol
                 self.on_ground = True
             elif self.velocity_y < 0:
                 self.rect.top = hit.rect.bottom

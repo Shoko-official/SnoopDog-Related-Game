@@ -231,7 +231,11 @@ class GameState(State):
         self.player.check_collisions(self.platforms, self.trash_obstacles, actual_dt)
         self.player.update_powerups(actual_dt, self.weed_items); self.particles.update()
         for sprite in self.all_sprites:
-            if sprite.rect.right < self.camera_x - 400 or sprite.rect.top > SCREEN_HEIGHT + 400: sprite.kill()
+            if sprite.rect.right < self.camera_x - 400 or sprite.rect.top > SCREEN_HEIGHT + 400:
+                # Si c'est un mob qui dégage, c'est qu'on l'a évité proprement
+                if sprite in self.mobs:
+                    self.player.just_dodged_enemy = True
+                sprite.kill()
         # Pop des oiseaux
         ch = 0.04 if self.get_biome_at(self.camera_x + SCREEN_WIDTH) == "foret" else 0.005
         if self.camera_x > 5000 and random.random() < ch: self.spawn_aerial_enemy()
