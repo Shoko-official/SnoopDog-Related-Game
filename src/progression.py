@@ -30,7 +30,8 @@ class PlayerProfile:
             "active_skin_set": "default",
             "active_variant": None,
             "stats": {"total_dist": 0, "total_weed": 0, "total_kills": 0},
-            "weed_stash": 0
+            "weed_stash": 0,
+            "best_distance": 0
         }
         self.reload()
 
@@ -136,6 +137,12 @@ class PlayerProfile:
             # Update stats globales aussi tant qu'à faire
             self.state["stats"]["total_weed"] += w
             self.state["stats"]["total_dist"] += run_data.get("dist", 0)
+            changed = True
+
+        # Update meilleur distance (high score)
+        current_dist = run_data.get("dist", 0)
+        if current_dist > self.state.get("best_distance", 0):
+            self.state["best_distance"] = current_dist
             changed = True
         
         for q in self.state["quests"]:
