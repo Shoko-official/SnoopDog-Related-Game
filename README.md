@@ -8,7 +8,8 @@ Un endless runner 2D dark & gritty où vous devez fuir dans la rue, collecter de
 
 | Touche | Action |
 |--------|--------|
-| **Flèche Haut** | Sauter |
+| **Flèche Haut / Espace** | Sauter |
+| **Flèche Bas** | Descendre vite (en l'air) |
 | **P / Echap** | Pause |
 
 ### Touches de débogage (cheat)
