@@ -7,6 +7,7 @@ from effects import ParticleEmitter, HUD, ParallaxBackground, ParallaxLayer
 from asset_loader import asset_loader, play_sfx
 from assets_registry import ASSETS
 from states.game_over_state import GameOverState
+from effects import DayNightCycle
 
 class GameState(State):
     def check_mask_collision(self, s1, s2):
@@ -39,6 +40,7 @@ class GameState(State):
         self.death_timer, self.slow_motion_factor = 0.0, 1.0
         self.drone_cooldown, self.current_biome, self.show_hitboxes = 0, "street", False
         self.arrest_status = None
+        self.day_night = DayNightCycle()
         
         # Le dico pour les quêtes
         self.run_stats = {
@@ -231,17 +233,14 @@ class GameState(State):
         self.player.check_collisions(self.platforms, self.trash_obstacles, actual_dt)
         self.player.update_powerups(actual_dt, self.weed_items); self.particles.update()
         for sprite in self.all_sprites:
-            if sprite.rect.right < self.camera_x - 400 or sprite.rect.top > SCREEN_HEIGHT + 400:
-                # Si c'est un mob qui part, c'est qu'on l'a évité proprement
-                if sprite in self.mobs:
-                    self.player.just_dodged_enemy = True
-                sprite.kill()
+            if sprite.rect.right < self.camera_x - 400 or sprite.rect.top > SCREEN_HEIGHT + 400: sprite.kill()
         # Pop des oiseaux
         ch = 0.04 if self.get_biome_at(self.camera_x + SCREEN_WIDTH) == "foret" else 0.005
         if self.camera_x > 5000 and random.random() < ch: self.spawn_aerial_enemy()
         self.player.update(actual_dt, self.platforms, self.trash_obstacles, self.weed_items, self.powerups, self.mobs)
         self.all_sprites.update(actual_dt, self.platforms, self.trash_obstacles, self.arrest_status)
         self.weed_items.update(actual_dt); self.powerups.update(actual_dt); self.check_interactions()
+        self.day_night.update(dt)
 
     def spawn_aerial_enemy(self):
         Bird([self.all_sprites, self.mobs], self.camera_x + SCREEN_WIDTH + 100, random.randint(50, 400), -1)
@@ -277,6 +276,7 @@ class GameState(State):
                     if hasattr(m, 'retreating'): m.retreating = True
                 else: 
                     if self.player.take_damage(1): self.trigger_death("WASTED")
+                    self.player.just_took_damage = True
         c_rect = self.player.rect.inflate(60, 60)
         for w in self.weed_items:
             if c_rect.colliderect(w.rect):
@@ -324,19 +324,23 @@ class GameState(State):
 
     def draw(self, surface):
         self.render_surface.fill((25, 25, 30))
-        self.render_surface.fill((25, 25, 30))
         self.parallax_bg.draw(self.render_surface, self.camera_x)
+        
         if self.next_parallax_bg:
             # On dessine le prochain fond sur une surface temporaire avec de l'alpha pour le fondu
             temp_bg = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)); temp_bg.set_colorkey((0,0,0))
             self.next_parallax_bg.draw(temp_bg, self.camera_x)
             temp_bg.set_alpha(int(self.fade_alpha)); self.render_surface.blit(temp_bg, (0,0))
+            
         for s in self.all_sprites:
             h_rect = s.rect.move(-self.camera_x, 0)
             v_rect = s.image.get_rect(midbottom=h_rect.midbottom)
             v_rect.x += getattr(s, 'visual_offset_x', 0); v_rect.y += getattr(s, 'visual_offset_y', 0)
             self.render_surface.blit(s.image, v_rect)
-        for p in self.particles: self.render_surface.blit(p.image, (p.rect.x - self.camera_x, p.rect.y))
+            
+        for p in self.particles: 
+            self.render_surface.blit(p.image, (p.rect.x - self.camera_x, p.rect.y))
+            
         if self.show_hitboxes:
             for s in self.all_sprites:
                 if hasattr(s, 'mask'):
@@ -346,23 +350,33 @@ class GameState(State):
                          vr.x += getattr(s, 'visual_offset_x', 0); vr.y += getattr(s, 'visual_offset_y', 0)
                          pts_adj = [(p[0] + vr.x, p[1] + vr.y) for p in pts]
                          if len(pts_adj) > 1: pygame.draw.lines(self.render_surface, (50, 255, 50), True, pts_adj, 1)
+
         surface.blit(self.apply_shake(self.render_surface), (0, 0))
-        # On blit tout sur la surface de rendu
+
+        if hasattr(self, 'day_night'):
+            self.day_night.draw(surface)
+
         self.hud.draw_hearts(surface, HUD_X, HUD_Y, self.player.hp, self.player.max_hp)
+        
         if not self.game_over:
             off = self.player.max_hp * (HEART_SIZE + 5) + 20
             self.hud.draw_withdrawal_bar(surface, HUD_X + off, HUD_Y + 10, self.player.withdrawal, self.player.max_withdrawal)
             from progression import progression
-            k, _ = progression.get_active_collectible(); w_im = asset_loader.fetch_img(ASSETS["items"][k])
+            k, _ = progression.get_active_collectible()
+            w_im = asset_loader.fetch_img(ASSETS["items"][k])
             self.hud.draw_item_count(surface, SCREEN_WIDTH - 150, HUD_Y, w_im, self.player.weed_count)
-            f = pygame.font.Font(None, 40); sc_t = f.render(f"DIST: {self.score}m", True, (255, 255, 255))
+            f = pygame.font.Font(None, 40)
+            sc_t = f.render(f"DIST: {self.score}m", True, (255, 255, 255))
             surface.blit(sc_t, (SCREEN_WIDTH // 2 - sc_t.get_width() // 2, 25))
             self.hud.draw_powerup_bar(surface, HUD_X, HUD_Y + 60, self.player.shield_timer, 1200, (100, 200, 255), "SHIELD")
             self.hud.draw_powerup_bar(surface, HUD_X + 170, HUD_Y + 60, self.player.magnet_timer, 1200, (255, 100, 100), "MAGNET")
             if self.player.combo_counter > 1:
-                cf = pygame.font.Font(None, 60); ct = cf.render(f"{self.player.combo_counter}x COMBO!", True, C_GOLD)
+                cf = pygame.font.Font(None, 60)
+                ct = cf.render(f"{self.player.combo_counter}x COMBO!", True, (255, 215, 0)) # C_GOLD
                 surface.blit(ct, (SCREEN_WIDTH // 2 - ct.get_width() // 2, 80))
-        if self.paused: self.hud.draw_pause_menu(surface, self.show_missions)
+                
+        if self.paused: 
+            self.hud.draw_pause_menu(surface, self.show_missions)
 
     def apply_shake(self, surf):
         if self.game_over: return surf
