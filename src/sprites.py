@@ -501,7 +501,8 @@ class Police(PhysObj):
             return
         
         # IA basique : suit le player mais pas trop près
-        wanted = self.player.speed
+        # Vitesse de base sans les pénalités du joueur (slow/addiction) pour que le policier rattrape
+        wanted = PLAYER_SPEED * self.player.global_speed_mult
         dist = self.player.rect.centerx - self.rect.centerx
         
         if dist > 600:   wanted *= 1.2 # Rattrape
@@ -514,11 +515,6 @@ class Police(PhysObj):
         self.rect.x += self.speed * dt
         self.on_ground = False
         self.check_platform_collisions(platforms)
-        
-        # Bloqué par poubelles
-        if trash_list:
-            for trash in trash_list:
-                if self.rect.colliderect(trash.rect): self.speed = 0
         
         self.check_state()
         self.animate()
