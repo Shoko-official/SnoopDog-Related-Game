@@ -25,6 +25,7 @@ Un endless runner 2D dark & gritty où vous devez fuir dans la rue, collecter de
 
 L’addiction est le coeur du jeu. Une barre en haut à gauche du HUD monte **continuellement** avec le temps.
  ![alt text](assets/docs/Image1.png)
+ 
 - À **100%** → **MANQUE** : game over immédiat.
 - Au-dessus de **50%** → votre personnage ralentit et marche au lieu de courir.
 - **Collecter de la weed** réduit le manque de 15 points à chaque prise.
