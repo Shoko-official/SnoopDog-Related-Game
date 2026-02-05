@@ -99,7 +99,11 @@ class Player(PhysObj):
             # Saut standard
             if (keys[pygame.K_SPACE] or keys[pygame.K_UP]):
                 if self.on_ground: self.jump()
-
+                    
+        # Fast fall : descente rapide en l'air
+        if keys[pygame.K_DOWN] and not self.on_ground:
+            self.velocity_y = max(self.velocity_y, FAST_FALL_FORCE)
+            
     def check_state(self):
         # Machine à états basique pour l'animation
         if self.hp <= 0 or self.withdrawal >= self.max_withdrawal or self.rect.top > DEATH_Y:
