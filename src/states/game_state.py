@@ -7,7 +7,6 @@ from effects import ParticleEmitter, HUD, ParallaxBackground, ParallaxLayer
 from asset_loader import asset_loader, play_sfx
 from assets_registry import ASSETS
 from states.game_over_state import GameOverState
-from effects import DayNightCycle
 
 class GameState(State):
     def check_mask_collision(self, s1, s2):
@@ -40,7 +39,6 @@ class GameState(State):
         self.death_timer, self.slow_motion_factor = 0.0, 1.0
         self.drone_cooldown, self.current_biome, self.show_hitboxes = 0, "street", False
         self.arrest_status = None
-        self.day_night = DayNightCycle()
         self.spawn_timer = 60 # Grace period (1s) to prevent instant death
         
         # Le dico pour les quêtes
@@ -247,7 +245,6 @@ class GameState(State):
         self.player.update(actual_dt, self.platforms, self.trash_obstacles, self.weed_items, self.powerups, self.mobs)
         self.all_sprites.update(actual_dt, self.platforms, self.trash_obstacles, self.arrest_status)
         self.weed_items.update(actual_dt); self.powerups.update(actual_dt); self.check_interactions()
-        self.day_night.update(dt)
 
     def spawn_aerial_enemy(self):
         Bird([self.all_sprites, self.mobs], self.camera_x + SCREEN_WIDTH + 100, random.randint(50, 400), -1)
@@ -360,9 +357,6 @@ class GameState(State):
                          if len(pts_adj) > 1: pygame.draw.lines(self.render_surface, (50, 255, 50), True, pts_adj, 1)
 
         surface.blit(self.apply_shake(self.render_surface), (0, 0))
-
-        if hasattr(self, 'day_night'):
-            self.day_night.draw(surface)
 
         self.hud.draw_hearts(surface, HUD_X, HUD_Y, self.player.hp, self.player.max_hp)
         
