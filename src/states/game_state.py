@@ -41,6 +41,7 @@ class GameState(State):
         self.drone_cooldown, self.current_biome, self.show_hitboxes = 0, "street", False
         self.arrest_status = None
         self.day_night = DayNightCycle()
+        self.spawn_timer = 60 # Grace period (1s) to prevent instant death
         
         # Le dico pour les quêtes
         self.run_stats = {
@@ -222,6 +223,7 @@ class GameState(State):
                     play_sfx("click")
         if self.paused: return
         actual_dt = dt * self.slow_motion_factor
+        if self.spawn_timer > 0: self.spawn_timer -= 1
         if self.drone_cooldown > 0: self.drone_cooldown -= actual_dt
         self.camera_x = max(0, self.player.rect.centerx - SCREEN_WIDTH // 2)
         self.score = max(self.score, int(self.camera_x / 100))
@@ -305,7 +307,8 @@ class GameState(State):
              if self.player.has_shield:
                   self.police.rect.x -= 400; self.police.speed = 0 
                   self.emitter.create_explosion(self.player.rect.centerx, self.player.rect.centery, (100, 200, 255), 15, self.particles)
-             elif not self.player.invincible: self.trigger_death("ARRESTED")
+             elif not self.player.invincible and self.spawn_timer <= 0: # Check grace period
+                  self.trigger_death("ARRESTED")
         for m in self.mobs:
             if isinstance(m, Drone):
                 h_hit = [p for p in pygame.sprite.spritecollide(m, self.powerups, True, pygame.sprite.collide_mask) if p.type == "heart"]
@@ -399,27 +402,48 @@ class GameState(State):
         p, h_ecran = self.player, float(SCREEN_HEIGHT)
         scan = {
             'next_gap_dist': 1500, 'next_enemy_dist': 1500, 'next_enemy_type': 0, 'next_platform_y_delta': 0,
-            'next_platform_x_dist': 1500, 'next_platform_width': 0, 'gap_size': 0, 'enemy_y_delta': 0
+            'next_platform_x_dist': 1500, 'next_platform_width': 0, 'gap_size': 0, 'enemy_y_delta': 0,
+            'next_weed_dist': 1500, 'next_trash_dist': 1500
         }
         end_sol, next_p, d_min = -1, None, 9999
         pr, pb = p.rect.right, p.rect.bottom
         for plat in self.platforms:
             r = plat.rect
             if r.right < p.rect.left - 100: continue
-            meme_h = abs(r.top - pb) < 50 or (p.on_ground and abs(r.top - p.rect.bottom) < 50)
-            if r.left <= end_sol + 20 or (end_sol == -1 and r.left <= pr + 50):
+            
+            # On détecte si c'est la plateforme sous nos pieds, même si on est en l'air
+            is_under_player = r.left <= p.rect.centerx <= r.right
+            meme_h = abs(r.top - pb) < 50 or (p.on_ground and abs(r.top - p.rect.bottom) < 50) or is_under_player
+            
+            if r.left <= end_sol + 20 or (end_sol == -1 and r.left <= pr + 50) or is_under_player:
                 if meme_h: end_sol = max(end_sol, r.right)
             if r.left > pr:
                 dist = r.left - pr
                 if dist < d_min: d_min, next_p = dist, plat
         if end_sol != -1: scan['next_gap_dist'] = max(0, end_sol - pr)
         else: scan['next_gap_dist'] = 0
+        
         if next_p:
             scan['next_platform_y_delta'] = (next_p.rect.top - pb) / h_ecran
             scan['next_platform_x_dist'] = max(0, next_p.rect.left - pr)
             scan['next_platform_width'] = next_p.rect.width
             if end_sol != -1: scan['gap_size'] = max(0, next_p.rect.left - end_sol)
         else: scan['next_platform_y_delta'], scan['next_platform_x_dist'], scan['next_platform_width'], scan['gap_size'] = 0, 1500, 0, 0
+        
+        # Détection Weed la plus proche
+        w_dist = 1500
+        for w in self.weed_items:
+            dx = w.rect.left - pr
+            if 0 < dx < w_dist: w_dist = dx
+        scan['next_weed_dist'] = w_dist
+
+        # Détection Poubelle la plus proche
+        t_dist = 1500
+        for t in self.trash_obstacles:
+            dx = t.rect.left - pr
+            if 0 < dx < t_dist: t_dist = dx
+        scan['next_trash_dist'] = t_dist
+
         m_dist, m_ref = 1500, None
         targets = list(self.mobs)
         if self.police and self.police.rect.centerx > p.rect.centerx: targets.append(self.police)
@@ -438,6 +462,7 @@ class GameState(State):
             s.empty()
         self.score, self.camera_x, self.last_gen_x, self.drone_cooldown = 0, 0, SCREEN_WIDTH, 0
         self.death_triggered = self.game_over = self.paused = False
+        self.spawn_timer = 60
         sg = Obstacle(-SCREEN_WIDTH, FLOOR_Y, SCREEN_WIDTH * 2, 200, biome=self.current_biome)
         self.platforms.add(sg); self.all_sprites.add(sg)
         self.player = Player(self.all_sprites)

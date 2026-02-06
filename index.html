@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<!-- Corrected by Shoko on 2026-02-06 -->
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get What U Need - Site Officiel</title>
+
+    <!-- Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <style>
+        /* * DESIGN TOKENS */
+        :root {
+            --primary: #2563eb;
+            /* Un bleu plus neutre et pro */
+            --primary-dark: #1e40af;
+            --surface: #ffffff;
+            --background: #f8fafc;
+            --text-main: #0f172a;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --font-main: 'Inter', sans-serif;
+            --max-width: 1024px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* * NAVIGATION */
+        .navbar {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        /* * HERO SECTION */
+        .hero-section {
+            background: var(--surface);
+            padding: 80px 24px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 32px;
+            object-fit: contain;
+            background: #000;
+            /* Fond noir pour le logo snoop si transparent */
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        /* * ACTIONS */
+        .button-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 50px;
+            /* Pill shape */
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--background);
+            border-color: var(--text-secondary);
+        }
+
+        /* * FEATURES GRID */
+        .features-section {
+            padding: 80px 24px;
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            padding: 32px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            transition: border-color 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            background: #eff6ff;
+            color: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* * COMPATIBILITY */
+        .os-section {
+            background: #1e293b;
+            color: white;
+            padding: 60px 24px;
+            text-align: center;
+            border-radius: var(--radius);
+            margin: 40px auto;
+            /* Centré horizontalement */
+            max-width: var(--max-width);
+        }
+
+        .os-icons {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin: 32px 0;
+            font-size: 32px;
+            opacity: 0.8;
+        }
+
+        /* * FOOTER */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .os-section {
+                margin: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-brand">
+                <span class="material-icons-round" style="color: var(--primary);">sports_esports</span>
+                Get What U Need
+            </a>
+            <div class="nav-links">
+                <a href="https://github.com/shoko-official/get_what_u_need" class="nav-link">GitHub</a>
+                <a href="#features" class="nav-link">Infos</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section">
+        <div class="hero-content">
+            <!-- Image locale pointant vers les assets du projet -->
+            <img src="assets/graphics/items/weed.png" alt="Get What U Need Logo" class="hero-logo"
+                onerror="this.src='https://placehold.co/120x120/000000/FFF?text=Introuvable'">
+
+            <h1>L'expérience Arcade<br>Procédurale.</h1>
+            <p class="hero-subtitle">
+                Un runner infini satirique où chaque session est unique.
+                Gérez vos ressources, débloquez des skins et survivez à la ville.
+            </p>
+
+            <div class="button-group">
+                <!-- Lien direct vers l'exécutable -->
+                <a href="https://github.com/Shoko-official/Get_What_U_Need/releases/download/v1.1.1/Get_What_U_Need.exe"
+                    class="btn btn-primary">
+                    <span class="material-icons-round">download</span>
+                    Télécharger pour Windows
+                    <span style="font-size: 10px; opacity: 0.8; margin-left: 5px;">(exe)</span>
+                </a>
+
+                <!-- Lien vers le repo pour les autres OS -->
+                <a href="https://github.com/shoko-official/get_what_u_need" class="btn btn-secondary">
+                    <span class="material-icons-round">code</span>
+                    Code Source (Mac/Linux)
+                </a>
+            </div>
+            <p style="margin-top: 16px; font-size: 12px; color: var(--text-secondary);">
+                v1.1.1 • Gratuit & Open Source
+            </p>
+        </div>
+    </header>
+
+    <main>
+        <div class="os-section">
+            <h2 style="font-size: 24px; margin-bottom: 16px;">Multi-Plateforme</h2>
+            <p style="opacity: 0.9; max-width: 600px; margin: 0 auto;">
+                Compatible avec tous les systèmes d'exploitation modernes.
+                Une version exécutable est disponible pour Windows. Pour macOS et Linux, le jeu tourne nativement via
+                Python.
+            </p>
+            <div class="os-icons">
+                <span class="material-icons-round" title="Windows">desktop_windows</span>
+                <span class="material-icons-round" title="Apple">laptop_mac</span>
+                <span class="material-icons-round" title="Linux">terminal</span>
+            </div>
+        </div>
+
+        <section class="features-section" id="features">
+            <div class="grid">
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <span class="material-icons-round">all_inclusive</span>
+                    </div>
+                    <h3 class="feature-title">Monde Infini</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px;">
+                        Algorithme de génération procédurale assurant qu'aucune course ne ressemble à la précédente.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <span class="material-icons-round">palette</span>
+                    </div>
+                    <h3 class="feature-title">Pixel Art</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px;">
+                        Direction artistique soignée avec effets de particules, parallaxe et cycle jour/nuit dynamique.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <span class="material-icons-round">videogame_asset</span>
+                    </div>
+                    <h3 class="feature-title">Gameplay Arcade</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px;">
+                        Contrôles réactifs, physique précise et système de progression addictif avec boutique in-game.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 Shoko Official. Projet Open Source sous licence MIT.</p>
+        <p style="margin-top: 8px; font-size: 12px; opacity: 0.6;">
+            Ce logiciel est une œuvre satirique. Images hébergées localement.
+        </p>
+    </footer>
+
+</body>
+
+</html>

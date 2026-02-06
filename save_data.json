@@ -1,0 +1,47 @@
+{
+  "credits": 0,
+  "quests": [
+    {
+      "id": "dist",
+      "title": "Marathonien",
+      "desc": "Parcours 1141m",
+      "goal": 1141,
+      "current": 0,
+      "reward": 150,
+      "completed": false,
+      "claimed": false
+    },
+    {
+      "id": "rats",
+      "title": "Dératiseur",
+      "desc": "Écrase 10 rats",
+      "goal": 10,
+      "current": 0,
+      "reward": 120,
+      "completed": false,
+      "claimed": false
+    },
+    {
+      "id": "combo",
+      "title": "Stylé",
+      "desc": "Fais un combo x5",
+      "goal": 5,
+      "current": 0,
+      "reward": 200,
+      "completed": false,
+      "claimed": false
+    }
+  ],
+  "unlocked_sets": [
+    "default"
+  ],
+  "unlocked_items": [],
+  "active_skin_set": "default",
+  "active_variant": null,
+  "stats": {
+    "total_dist": 0,
+    "total_weed": 0,
+    "total_kills": 0
+  },
+  "weed_stash": 0
+}

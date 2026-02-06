@@ -11,15 +11,16 @@ from assets_registry import ASSETS
 def get_mask(surface):
     return pygame.mask.from_surface(surface)
 
+# Corrected by Shoko on 2026-02-05
 class Player(PhysObj):
     def __init__(self, groups):
         super().__init__(groups, 100, FLOOR_Y - 50)
         
-        # RL Integration
+        # Integration IA
         self.ai_mode = False
-        self.current_ai_action = 0 # 0 = Run | 1 = Jump | 2 = Fast Fall
-
-        # Rewards
+        self.current_ai_action = 0 # 0 = Courir | 1 = Sauter | 2 = Chute rapide
+        
+        # Récompenses pour le bot
         self.just_jumped = False
         self.just_fast_fell = False
         self.just_landed = False
@@ -84,7 +85,7 @@ class Player(PhysObj):
         self.has_shield = False      
         self.shield_timer = 0
         
-        # Cheats / Debug
+        # Cheats et mode dev
         self.god_mode = False 
         self.global_speed_mult = 1.0 
         
@@ -112,7 +113,8 @@ class Player(PhysObj):
                     self.jump()
                     self.just_jumped = True # Reward 
             elif self.current_ai_action == 2: # Fast Fall
-                if not self.on_ground:
+                # ANTI-SPAM PHYSIQUE : On interdit le plongeon en pleine ascension
+                if not self.on_ground and self.velocity_y > -200:
                     self.velocity_y = max(self.velocity_y, FAST_FALL_FORCE)
                     self.just_fast_fell = True # Reward
             return
@@ -133,9 +135,10 @@ class Player(PhysObj):
             if (keys[pygame.K_SPACE] or keys[pygame.K_UP]):
                 if self.on_ground: self.jump()
                     
-        # Fast fall : descente rapide en l'air
+        # Fast fall : descente rapide en l'air (Coiffeur par Shoko)
         if keys[pygame.K_DOWN] and not self.on_ground:
-            self.velocity_y = max(self.velocity_y, FAST_FALL_FORCE)
+            if self.velocity_y > -200:
+                self.velocity_y = max(self.velocity_y, FAST_FALL_FORCE)
             
     def check_state(self):
         # Machine à états basique pour l'animation
@@ -272,10 +275,12 @@ class Player(PhysObj):
         self.check_platform_collisions(platforms)
         
         # Atterrissage sur poubelles (pour sauter dessus)
-        if self.velocity_y > 0:
+        if self.velocity_y > 100: # On doit vraiment tomber
             hits = pygame.sprite.spritecollide(self, trash_list, False)
             for hit in hits:
-                if self.rect.bottom <= hit.rect.bottom: 
+                # On ne 'snap' que si on était au-dessus au début du mouvement
+                # et qu'on atterrit proprement sur le plateau supérieur
+                if self.rect.bottom >= hit.rect.top and self.rect.bottom <= hit.rect.top + 30: 
                     self.rect.bottom = hit.rect.top
                     self.velocity_y = 0
                     if not self.on_ground: self.just_landed = True
@@ -595,22 +600,50 @@ class Police(PhysObj):
             self.animate()
             return
         
-        # IA basique : suit le player mais pas trop près
-        # Vitesse de base sans les pénalités du joueur (slow/addiction) pour que le policier rattrape
-        wanted = PLAYER_SPEED * self.player.global_speed_mult
+        # Le flic doit suivre le joueur, mais il est increvable
+        target_speed = self.player.speed
         dist = self.player.rect.centerx - self.rect.centerx
         
-        if dist > 600:   wanted *= 1.2 # Rattrape
-        elif dist < 150: wanted *= 0.8 # Freine
+        # Poursuite dynamique : il s'adapte à la distance
+        if dist > 1000:
+            wanted = target_speed * 2.0 # Si t'es trop loin, il bourre comme un sourd
+        elif dist > 500:
+            wanted = target_speed * 1.5
+        elif dist < 120:
+            wanted = target_speed * 0.5 # Il freine un peu s'il te colle trop
+        else:
+            wanted = target_speed
+            
+        # S'il t'a dépassé (peu probable avec les collisions), il s'arrête
+        if dist < -50:
+            wanted = 0
         
-        # Lissage de la vitesse
-        self.speed += (wanted - self.speed) * 0.1
+        # Accélération fluide pour pas qu'il soit trop rigide
+        self.speed += (wanted - self.speed) * 0.2
         
+        # Physique de base
         self.apply_gravity(dt)
         self.rect.x += self.speed * dt
+        
+        # --- LOGIQUE D'IMMORTALITÉ ---
+        
+        # 1. Anti-Chute : S'il tombe dans un trou, on le remonte direct au niveau du sol
+        if self.rect.top > DEATH_Y:
+            self.rect.bottom = FLOOR_Y
+            self.velocity_y = 0
+            
+        # 2. Anti-Stuck (Cul-de-sac) : S'il tape un mur, il grimpe direct dessus
+        # On utilise une petite zone de détection devant lui
         self.on_ground = False
         self.check_platform_collisions(platforms)
         
+        # S'il a tapé un mur, on le force à monter pour pas qu'il reste bloqué comme un gland
+        if self.just_hit_wall:
+            # On le téléporte un peu plus haut pour qu'il "escalade" l'obstacle
+            self.rect.bottom -= 150 
+            self.velocity_y = -300 # Un petit bump vers le haut
+            self.just_hit_wall = False
+
         self.check_state()
         self.animate()
 
