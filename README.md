@@ -1,5 +1,7 @@
 # Get What U Need - Bad Trip Edition v1.1.1
 
+Attention les push de Shoko-ofi ne viennent pas forcément ce celui-ci, nous partagions le même vscode et par conséquent seul un ordinateur envoyais vraiment.
+
 Un endless runner 2D dark & gritty où vous devez fuir dans la rue, collecter de la weed pour survivre, et éviter la police à tout prix.
 
 ---
